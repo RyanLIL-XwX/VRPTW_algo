@@ -1,6 +1,7 @@
 # VRPTW
 # Author: Hanzhen Qin, Shenhan Xu
 import json
+from haversine import haversine, Unit # 用来计算两个经纬度之间的距离
 
 class VRPTW_model(object):
     def __init__(self, file_path):
@@ -85,8 +86,46 @@ class VRPTW_model(object):
         # python 3.6, f可以允许在字符串中直接嵌入表达式, 也称为格式化字符串字面值
         # return f"VRPTW_model:(\n force_merge={self.force_merge},\n hand_over_time_by={self.hand_over_time_by},\n order_list={self.order_list},\n parameters={self.parameters},\n task_code={self.task_code},\n vehicle_type={self.vehicle_type},\n warehouse={self.warehouse}\n)"
     
+    # question: 是否在location_collect中加入area id, 这样可以方便确定两个订单是否在同一个地区, 但是会出现的问题是, 两个点很近, 却不在同一个地区
+    def calculate_distance(self):
+        location_collect = [] # 使用list容器来储存经纬度信息
+        distance_store = dict() # 使用字典来储存两点之间的距离
+        
+        # list中的每个index对应一个订单, 0为receivingAddress, 1为receivingLatitude, 2为receivingLongitude
+        for i in range(len(self.order_list)):
+            # 如果order_list中的当前index所在订单中包含receivingLatitude和receivingLongitude, 并且这两个值不为None, 则计算两点之间的距离
+            if ("receivingLatitude" in self.order_list[i].keys() and "receivingLongitude" in self.order_list[i].keys() and self.order_list[i]["receivingLatitude"] != None and self.order_list[i]["receivingLongitude"] != None):
+                temp_list = []
+                temp_list.append(self.order_list[i]["receivingAddress"])
+                temp_list.append(float(self.order_list[i]["receivingLatitude"]))
+                temp_list.append(float(self.order_list[i]["receivingLongitude"]))
+                location_collect.append(temp_list)
+            else:
+                print("No enough information for latitude and longitude in the order list.\n")
+        
+        # test for location_collect
+        # print(location_collect)
+        
+        pointer_a, pointer_b = 0, 1 # 用于指向当前订单的后一个订单
+        while True:
+            # 完成前指针所需计算的所有距离, 前指针开始更新, 后指针指向前指针的下一个订单
+            if (pointer_b == len(location_collect)):
+                pointer_a += 1
+                pointer_b = pointer_a + 1
+                # 如果后前针达到list的长度 - 1, 也就表示所有的地址之间的距离都被计算完毕
+                if (pointer_a == len(location_collect) - 1):
+                    break
+            # distance = ((a_lat, a_lon), (b_lat, b_lon), unit = Unit.KILOMETERS)
+            distance_km = haversine((location_collect[pointer_a][1], location_collect[pointer_a][2]), (location_collect[pointer_b][1], location_collect[pointer_b][2]), unit=Unit.KILOMETERS)
+            distance_store[distance_km] = (location_collect[pointer_a][0], location_collect[pointer_b][0])
+            pointer_b += 1
+        return distance_store
+            
 # test
 if __name__ == "__main__":
-    file = input("Type the name of the file: ").strip()
+    file = input("Type the name of the file: ").strip() # strip()函数用于去除字符串两端的空格
+    # 创建一个VRPTW_model对象, 并将file作为参数传入
     order_data = VRPTW_model(file)
-    print(order_data)
+    # print(order_data)
+    distance = order_data.calculate_distance()
+    print(distance)
