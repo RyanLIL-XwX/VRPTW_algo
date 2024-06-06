@@ -16,6 +16,15 @@ class VRPTW_model(object):
         self.warehouse = None
         self.load_data()
         self.parse_data()
+        
+        # 用于存储所有的经纬度信息和对应的地址
+        self.location_collect = self.collect_location_info()
+        
+        # 用于存储两点之间的距离
+        self.calculate_distance(self.location_collect)
+        
+        # 用于存储每个订单的停留时间
+        self.calculate_stay_period()
     
     # 函数用于读取txt文件中json格式的数据
     def load_data(self):
@@ -86,26 +95,31 @@ class VRPTW_model(object):
         # python 3.6, f可以允许在字符串中直接嵌入表达式, 也称为格式化字符串字面值
         # return f"VRPTW_model:(\n force_merge={self.force_merge},\n hand_over_time_by={self.hand_over_time_by},\n order_list={self.order_list},\n parameters={self.parameters},\n task_code={self.task_code},\n vehicle_type={self.vehicle_type},\n warehouse={self.warehouse}\n)"
     
-    # question: 是否在location_collect中加入area id, 这样可以方便确定两个订单是否在同一个地区, 但是会出现的问题是, 两个点很近, 却不在同一个地区
-    def calculate_distance(self):
+    # 收集所有的经纬度信息和对应的地址, 包括order_list和warehouse
+    def collect_location_info(self):
         location_collect = [] # 使用list容器来储存经纬度信息
-        distance_store = dict() # 使用字典来储存两点之间的距离
-        
+        # warehouse
+        if ("address" in self.warehouse.keys() and "latitude" in self.warehouse.keys() and "longitude" in self.warehouse.keys() and self.warehouse["address"] != None and self.warehouse["latitude"] != None and self.warehouse["longitude"] != None):
+            location_collect.append([self.warehouse["address"], float(self.warehouse["latitude"]), float(self.warehouse["longitude"])])
+        else:
+            print("No enough information for the warehouse.\n")
+        # order_list
         # list中的每个index对应一个订单, 0为receivingAddress, 1为receivingLatitude, 2为receivingLongitude
         for i in range(len(self.order_list)):
             # 如果order_list中的当前index所在订单中包含receivingLatitude和receivingLongitude, 并且这两个值不为None, 则计算两点之间的距离
-            if ("receivingLatitude" in self.order_list[i].keys() and "receivingLongitude" in self.order_list[i].keys() and self.order_list[i]["receivingLatitude"] != None and self.order_list[i]["receivingLongitude"] != None):
+            if ("receivingAddress" in self.order_list[i].keys() and "receivingLatitude" in self.order_list[i].keys() and "receivingLongitude" in self.order_list[i].keys() and self.order_list[i]["receivingLatitude"] != None and self.order_list[i]["receivingLongitude"] != None and self.order_list[i]["receivingAddress"] != None):
                 temp_list = []
                 temp_list.append(self.order_list[i]["receivingAddress"])
                 temp_list.append(float(self.order_list[i]["receivingLatitude"]))
                 temp_list.append(float(self.order_list[i]["receivingLongitude"]))
                 location_collect.append(temp_list)
             else:
-                print("No enough information for latitude and longitude in the order list.\n")
-        
-        # test for location_collect
-        # print(location_collect)
-        
+                print("No enough information for the order list.\n")
+        return location_collect
+    
+    # 通过经纬度计算两点之间的距离
+    def calculate_distance(self, location_collect):
+        distance_store = dict() # 使用字典来储存两点之间的距离
         pointer_a, pointer_b = 0, 1 # 用于指向当前订单的后一个订单
         while True:
             # 完成前指针所需计算的所有距离, 前指针开始更新, 后指针指向前指针的下一个订单
@@ -120,12 +134,31 @@ class VRPTW_model(object):
             distance_store[distance_km] = (location_collect[pointer_a][0], location_collect[pointer_b][0])
             pointer_b += 1
         return distance_store
-            
+    
+    # 计算每个订单的停留时间(单位: 分钟)
+    def calculate_stay_period(self):
+        order_stay_period_dict = dict() # 用于存储每个订单的停留时间
+        for i in range(len(self.order_list)):
+            if ("weight" in self.order_list[i].keys() and self.order_list[i]["weight"] != None): 
+                stay_period = self.order_list[i]["weight"] * self.parameters["handoverVariableTime"] + self.parameters["handoverFixedTime"]
+                order_stay_period_dict[self.order_list[i]["orderCode"]] = stay_period
+        return order_stay_period_dict
+
 # test
 if __name__ == "__main__":
+    '''
+    order data: VRPTW_model对象
+    location_collect: 所有的经纬度信息和对应的地址, 每个index对应一个订单, 0为receivingAddress, 1为receivingLatitude, 2为receivingLongitude
+    distance_dict: 储存两点之间的距离, key为两点之间的距离, value为两个坐标点分别的地址
+    order_stay_period_dict: 储存每个订单的停留时间, key为订单号, value为停留时间
+    '''
     file = input("Type the name of the file: ").strip() # strip()函数用于去除字符串两端的空格
     # 创建一个VRPTW_model对象, 并将file作为参数传入
     order_data = VRPTW_model(file)
     # print(order_data)
-    distance = order_data.calculate_distance()
-    print(distance)
+    location_collect = order_data.collect_location_info()
+    distance_dict = order_data.calculate_distance(location_collect)
+    # print(distance_dict)
+    order_stay_period_dict = order_data.calculate_stay_period()
+    print(order_stay_period_dict)
+    
