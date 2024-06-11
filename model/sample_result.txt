@@ -1,32 +1,56 @@
-'''
 VRPTW_model:(
  force_merge=Y,
  hand_over_time_by=Weight,
+ 
  order_list=[{'areaId': [10785], 'deliveryAddress': '北京市顺义区顺平路576号',
  'deliveryEarliestTime': '2024-01-01 20:00:00', 'deliveryLatestTime': '2024-01-01 20:00:00',
  'lineId': 0, 'orderCode': 'ROX240101000000001', 'pointType': 0,
- 'receivingAddress': '北京市密云县古北口镇司马台村国际休闲旅游度假区第一层101单元', 'receivingCity': '北京市辖区',
- 'receivingDistrict': '密云区', 'receivingEarliestTime': '2024-01-01 21:00:00',
+ 'receivingAddress': '北京市密云县古北口镇司马台村国际休闲旅游度假区第一层101单元',
+ 'receivingCity': '北京市辖区', 'receivingDistrict': '密云区', 'receivingEarliestTime': '2024-01-01 21:00:00',
  'receivingLatestTime': '2024-01-02 07:00:00', 'receivingLatitude': '40.662436',
  'receivingLongitude': '117.251497', 'receivingProvince': '北京市', 'siteSeq': 0,
  'volume': 0.333901, 'weight': 0.0954, 'workTime': 0}, {'areaId': [10785],
  'deliveryAddress': '北京市顺义区顺平路576号', 'deliveryEarliestTime': '2024-01-01 20:00:00',
- 'deliveryLatestTime': '2024-01-01 20:00:00', 'lineId': 0, 'orderCode': 'ROX240101000000713',
+ 'deliveryLatestTime': '2024-01-01 20:00:00', 'lineId': 0, 'orderCode': 'ROX240101000000710',
+ 'pointType': 0, 'receivingAddress': '北京市大兴区旧宫镇旧宫西路3号(物美超市左侧)',
+ 'receivingCity': '北京市辖区', 'receivingDistrict': '大兴区', 'receivingEarliestTime': '2024-01-01 21:00:00',
+ 'receivingLatestTime': '2024-01-02 07:00:00', 'receivingLatitude': '39.811108',
+ 'receivingLongitude': '116.449658', 'receivingProvince': '北京市', 'siteSeq': 0, 'volume': 0.329087,
+ 'weight': 0.094025, 'workTime': 0}, {'areaId': [10785], 'deliveryAddress': '北京市顺义区顺平路576号',
+ 'deliveryEarliestTime': '2024-01-01 20:00:00', 'deliveryLatestTime': '2024-01-01 20:00:00',
+ 'lineId': 0, 'orderCode': 'ROX240101000000711', 'pointType': 0,
+ 'receivingAddress': '北京市东城区光明路11号天玉大厦1层西侧', 'receivingCity': '北京市辖区',
+ 'receivingDistrict': '东城区', 'receivingEarliestTime': '2024-01-01 21:00:00',
+ 'receivingLatestTime': '2024-01-02 07:00:00', 'receivingLatitude': '39.890756',
+ 'receivingLongitude': '116.443508', 'receivingProvince': '北京市', 'siteSeq': 0,
+ 'volume': 0.329087, 'weight': 0.094025, 'workTime': 0}, {'areaId': [10785],
+ 'deliveryAddress': '北京市顺义区顺平路576号', 'deliveryEarliestTime': '2024-01-01 20:00:00',
+ 'deliveryLatestTime': '2024-01-01 20:00:00', 'lineId': 0, 'orderCode': 'ROX240101000000465',
  'pointType': 0, 'receivingAddress': '北京市昌平区南口镇陈庄村(京藏高速北侧)八达岭奥特莱斯F2',
  'receivingCity': '北京市辖区', 'receivingDistrict': '昌平区', 'receivingEarliestTime': '2024-01-01 21:00:00',
  'receivingLatestTime': '2024-01-02 07:00:00', 'receivingLatitude': '40.240958',
+ 'receivingLongitude': '116.176189', 'receivingProvince': '北京市', 'siteSeq': 0, 'volume': 0.317115,
+ 'weight': 0.090604, 'workTime': 0}, {'areaId': [10785], 'deliveryAddress': '北京市顺义区顺平路576号',
+ 'deliveryEarliestTime': '2024-01-01 20:00:00', 'deliveryLatestTime': '2024-01-01 20:00:00', 'lineId': 0,
+ 'orderCode': 'ROX240101000000713', 'pointType': 0,
+ 'receivingAddress': '北京市昌平区南口镇陈庄村(京藏高速北侧)八达岭奥特莱斯F2', 'receivingCity': '北京市辖区',
+ 'receivingDistrict': '昌平区', 'receivingEarliestTime': '2024-01-01 21:00:00',
+ 'receivingLatestTime': '2024-01-02 07:00:00', 'receivingLatitude': '40.240958',
  'receivingLongitude': '116.176189', 'receivingProvince': '北京市', 'siteSeq': 0, 'volume': 0.329087,
  'weight': 0.094025, 'workTime': 0}],
- 
+
  parameters={'CenterLineDistanceLimit': 0.0, 'DC': 1.5, 'allowDistrictLimit': 3,
- 'centerLineDistanceLimit': 0.0, 'dC': 1.5, 'handoverFixedTime': 15,
- 'handoverVariableTime': 1, 'logOpen': 0, 'receivingAccessLimit': 20,
- 'receivingDistanceLimit': 100, 'shortestPathMode': 0, 'speed': 30, 'timeSpan': 0.0},
+ 'centerLineDistanceLimit': 0.0, 'dC': 1.5, 'handoverFixedTime': 15, 'handoverVariableTime': 1,
+ 'logOpen': 0, 'receivingAccessLimit': 20, 'receivingDistanceLimit': 100, 'shortestPathMode': 0,
+ 'speed': 30, 'timeSpan': 0.0},
  task_code=000277,
- 
+
  vehicle_type={'loadableVolume': 11.0, 'loadableWeight': 2.5, 'vehicleTypeCode': '100001'},
- warehouse={'address': '北京市顺义区顺平路576号', 'addressId': 0, 
- 'closeTime': '2024-01-02 23:00:59', 'latitude': '40.1196490409737', 
- 'longitude': '116.60616697651679', 'openTime': '2023-12-31 00:00:00'}
+ warehouse={'address': '北京市顺义区顺平路576号', 'addressId': 0, 'closeTime': '2024-01-02 23:00:59',
+ 'latitude': '40.1196490409737', 'longitude': '116.60616697651679', 'openTime': '2023-12-31 00:00:00'}
 )
-'''
+
+{'北京市密云县古北口镇司马台村国际休闲旅游度假区第一层101单元': [15.0954, ['ROX240101000000001']],
+'北京市大兴区旧宫镇旧宫西路3号(物美超市左侧)': [15.094025, ['ROX240101000000710']],
+'北京市东城区光明路11号天玉大厦1层西侧': [15.094025, ['ROX240101000000711']],
+'北京市昌平区南口镇陈庄村(京藏高速北侧)八达岭奥特莱斯F2': [30.184629, ['ROX240101000000465', 'ROX240101000000713']]}
