@@ -2,6 +2,7 @@
 # Author: Hanzhen Qin, Shenhan Xu
 import json
 from haversine import haversine, Unit # 用来计算两个经纬度之间的距离
+from datetime import datetime, timedelta # 用来计算时间
 
 class VRPTW_model(object):
     def __init__(self, file_path):
@@ -21,7 +22,8 @@ class VRPTW_model(object):
         self.location_collect = self.collect_location_info()
         
         # 用于存储两点之间的距离
-        self.calculate_distance(self.location_collect)
+        self.distance_store = self.calculate_distance(self.location_collect)
+        self.distance_store_update = self.warehouse_leave_info(self.distance_store)
         
         # 用于存储每个订单的停留时间
         self.item_weight = 0.0
@@ -31,13 +33,22 @@ class VRPTW_model(object):
         # 因为有些订单可能会出现重复地址，方便将重复的地址的货物重量合并
         self.stay_period_info = self.collect_stay_period_info(self.weight_collect) # 用于收集每个订单的停留时间信息的函数
         
+        # 更新时间信息
+        self.time = "" # 当前时间
+        self.delta_time = 0 # 时间间隔
+        self.mode = "" # 计算模式
+        self.calculate_time(self.time, self.delta_time, self.mode)
+        
         # 计算到达时间和离开时间
         self.single_stay_period = 0.0 # 单个订单的停留时间(单位: 分钟)
+        self.last_order_leave_time = 0.0 # 上一个订单的离开时间(单位: 分钟)
+        self.time_to_this_order = 0.0 # 到达当前订单的时间(单位: 分钟)
         self.arrive_time = self.calculate_arrive_time(self.last_order_leave_time, self.time_to_this_order)
         self.leave_time = self.calculate_leave_time(self.single_stay_period, self.arrive_time)
         
         # 仓库的出发时间
-        self.time_warehouse_leave()
+        self.first_order_address = "" # 第一个订单的地址
+        self.time_warehouse_leave(self.first_order_address)
     
     # 函数用于读取txt文件中json格式的数据
     def load_data(self):
@@ -144,12 +155,60 @@ class VRPTW_model(object):
                 # 如果后前针达到list的长度 - 1, 也就表示所有的地址之间的距离都被计算完毕
                 if (pointer_a == len(location_collect) - 1):
                     break
+            # 如果两个订单的地址相同, 则后指针指向下一个订单, 跳过当前计算
+            if (location_collect[pointer_a][0] == location_collect[pointer_b][0]):
+                pointer_b += 1
+                continue
             # distance = ((a_lat, a_lon), (b_lat, b_lon), unit = Unit.KILOMETERS)
             distance_km = haversine((location_collect[pointer_a][1], location_collect[pointer_a][2]), (location_collect[pointer_b][1], location_collect[pointer_b][2]), unit=Unit.KILOMETERS)
             distance_store[distance_km] = (location_collect[pointer_a][0], location_collect[pointer_b][0])
             pointer_b += 1
         return distance_store
     
+    # 过滤所有关于仓库的距离信息
+    def warehouse_leave_info(self, distance_store):
+        distance_store_update = {} # 用来过滤所有关于仓库的距离信息
+        warehouse = self.warehouse["address"]
+        for i in distance_store.keys():
+            if (distance_store[i][0] == warehouse):
+                distance_store_update[i] = (distance_store[i][0], distance_store[i][1])
+        return distance_store_update
+    
+    # 计算仓库的出发时间, 这个时间取决于第一个订单的地址的最早收货时间来进行反推计算
+    def time_warehouse_leave(self, first_order_address):
+        temp_collect = {}
+        for i in range(len(self.order_list)):
+            if (self.order_list[i]["receivingAddress"] == first_order_address):
+                # 出现一个地址多个订单的情况, 将这些订单的订单号和最早收货时间储存在temp_collect中
+                if (self.order_list[i]["receivingAddress"] in temp_collect.keys()):
+                    temp_collect[self.order_list[i]["receivingAddress"]].append((self.order_list[i]["orderCode"], self.order_list[i]["receivingEarliestTime"]))
+                else:
+                    temp_collect[self.order_list[i]["receivingAddress"]] = [(self.order_list[i]["orderCode"], self.order_list[i]["receivingEarliestTime"])]
+        vehicle_speed = self.parameters["speed"] # 车辆的速度
+        distance_between = 0 # 仓库于第一个订单之间的距离
+        for i in self.distance_store_update.keys():
+            if (self.distance_store_update[i][1] == first_order_address):
+                distance_between = i
+                break
+        # 计算仓库的出发时间
+        delta_time = round((distance_between / vehicle_speed) * 60) # 将km/h转换为km/min, 并且保留整数部分
+        # 使用专门计算时间的函数, 来更新时间
+        time_list = [] # 用于储存所有的最早收货时间
+        for i in temp_collect.values():
+            for j in i:
+                time_list.append(j[1])
+        # 计算仓库的出发时间, 并将其储存在warehouse_leave_time中
+        warehouse_leave_time = []
+        for i in range(len(time_list)):
+            self.time = time_list[i]
+            self.delta_time = delta_time
+            self.mode = "-"
+            warehouse_leave_time.append(self.calculate_time(self.time, self.delta_time, self.mode))
+        if (len(warehouse_leave_time) == 1):
+            return warehouse_leave_time[0]
+        else:
+            return warehouse_leave_time
+        
     # --------------------------------------------------------- #
     
     # 收集每个订单的重量信息, 储存在字典中, keys为订单号, value为(重量, 收货地址)
@@ -183,7 +242,33 @@ class VRPTW_model(object):
         return stay_period_info
     
     # --------------------------------------------------------- #
-
+    
+    # 专门更新时间的函数
+    def calculate_time(self, time: str, delta_time: int, mode: str) -> str:
+        # 检查time是否为空
+        if (not time):
+            raise ValueError("The input time is empty. Please provide a valid time string.")
+        
+        # 将字符串类型的时间转换为datetime对象
+        try:
+            initial_time = datetime.strptime(time, "%Y-%m-%d %H:%M:%S")
+        except ValueError as e:
+            raise ValueError(f"Time data '{time}' does not match format '%Y-%m-%d %H:%M:%S'.") from e
+        
+        # 将delta_time转换为timedelta对象，单位为分钟
+        delta = timedelta(minutes=delta_time)
+        
+        # 根据mode参数进行时间加减
+        if (mode == "+"):
+            new_time = initial_time + delta
+        elif (mode == "-"):
+            new_time = initial_time - delta
+        else:
+            raise ValueError("Mode should be '+' or '-'")
+        
+        # 将新的时间转换为字符串格式
+        return new_time.strftime("%Y-%m-%d %H:%M:%S")
+        
     # 只计算单个订单的到达时间
     def calculate_arrive_time(self, last_order_leave_time, time_to_this_order):
         arrive_time = last_order_leave_time + time_to_this_order
@@ -193,16 +278,13 @@ class VRPTW_model(object):
     def calculate_leave_time(self, single_stay_period, arrive_time):
         leave_time = single_stay_period + arrive_time
         return leave_time
-    
-    # 计算仓库的出发时间
-    def time_warehouse_leave(self):
-        pass
+            
 # test
 if __name__ == "__main__":
     '''
     order data: VRPTW_model对象
     location_collect: 所有的经纬度信息和对应的地址, 每个index对应一个订单, 0为receivingAddress, 1为receivingLatitude, 2为receivingLongitude
-    distance_dict: 储存两点之间的距离, key为两点之间的距离, value为两个坐标点分别的地址
+    distance_store: 储存两点之间的距离, key为两点之间的距离, value为两个坐标点分别的地址
     order_stay_period_dict: 储存每个订单的停留时间, key为收货地址, value为[停留时间(单位: 分钟), [订单号1, 订单号2, ...]]
     '''
     file = input("Type the name of the file: ").strip() # strip()函数用于去除字符串两端的空格
@@ -214,15 +296,22 @@ if __name__ == "__main__":
     # 测试对于经纬度信息的收集
     # 函数: collect_location_info(), calculate_distance()
     location_collect = order_data.collect_location_info()
-    distance_dict = order_data.calculate_distance(location_collect)
-    # print(distance_dict)
+    distance_store = order_data.calculate_distance(location_collect)
+    # print(distance_store)
+    
+    # 测试对于仓库出发信息的收集
+    # 函数: warehouse_leave_info()
+    distance_store_update = order_data.warehouse_leave_info(distance_store)
+    # print(distance_store_update)
+    time_warehouse_leave = order_data.time_warehouse_leave("北京市昌平区南口镇陈庄村(京藏高速北侧)八达岭奥特莱斯F2")
+    print(time_warehouse_leave)
     
     # 测试对于订单停留数间数据的收集
     # 函数: collect_weight_info(), collect_stay_period_info(), calculate_stay_period()
     weight_collect = order_data.collect_weight_info()
     # print(weight_collect)
     order_stay_period_dict = order_data.collect_stay_period_info(weight_collect)
-    print(order_stay_period_dict)
+    # print(order_stay_period_dict)
     
     # 测试计算到达时间和离开时间
     # 函数: calculate_arrive_time(), calculate_leave_time()
