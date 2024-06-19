@@ -290,17 +290,16 @@ class VRPTW_model(object):
             return True
         else:
             return False
+    
+    # --------------------------------------------------------- #
+    
+    # main part: finding path algorithm
+    # 城市之间的距离矩阵, self.calculate_distance()函数中已经计算过了
+    def find_path(self):
+        
+        return None
 
 if __name__ == "__main__":
-    '''
-    order data: VRPTW_model对象
-    location_collect: list容器(lists of list): [[address, latitude, longitude], ...]
-    distance_store: dictionary容器储存两点之间的距离: {距离: (address1, address2), ...}
-    distance_store_update: dictionary容器储存过滤后的两点之间的距离, 仅包含仓库的距离信息: {距离: (address1, address2), ...}
-    time_warehouse_leave: 仓库对特定地址的出发时间
-    weight_collect: dictionary容器: {订单号: [重量, 收货地址]}
-    order_stay_period_info: dictionary容器储存每个订单的停留时间: {收货地址: [停留时间(单位: 分钟), [订单号1, 订单号2, ...]]}
-    '''
     # 创建一个VRPTW_model对象, 并将file作为参数传入
     # 函数: load_data(), parse_data(), __str__()
     file = input("Type the name of the file: ").strip() # strip()函数用于去除字符串两端的空格
@@ -309,6 +308,16 @@ if __name__ == "__main__":
         
     # 测试所有class中的基础函数
     def testbasic():
+        #*
+            # order data: VRPTW_model对象
+            # location_collect: list容器(lists of list): [[address, latitude, longitude], ...]
+            # distance_store: dictionary容器储存两点之间的距离: {距离: (address1, address2), ...}
+            # distance_store_update: dictionary容器储存过滤后的两点之间的距离, 仅包含仓库的距离信息: {距离: (address1, address2), ...}
+            # time_warehouse_leave: 仓库对特定地址的出发时间
+            # weight_collect: dictionary容器: {订单号: [重量, 收货地址]}
+            # order_stay_period_info: dictionary容器储存每个订单的停留时间: {收货地址: [停留时间(单位: 分钟), [订单号1, 订单号2, ...]]}
+        #*#
+        
         # 测试对于经纬度信息的收集
         # 函数: collect_location_info(), calculate_distance()
         location_collect = order_data.collect_location_info()
