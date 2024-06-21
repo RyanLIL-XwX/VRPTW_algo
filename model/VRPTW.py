@@ -36,6 +36,24 @@ class VRPTW_model(object):
         self.single_stay_period = None # 单个订单的停留时间(分钟)
         self.set_receive_earliest_time = None # 设置最早收货时间
         self.set_receive_latest_time = None # 设置最晚收货时间
+        
+        # 给信息划分并分别处理
+        self.dongcheng = None # 储存东城区的地址信息
+        self.xicheng = None # 储存西城区的地址信息
+        self.chaoyang = None # 储存朝阳区的地址信息
+        self.fengtai = None # 储存丰台区的地址信息
+        self.shijingshan = None # 储存石景山区的地址信息
+        self.haidian = None # 储存海淀区的地址信息
+        self.mentougou = None # 储存门头沟区的地址信息
+        self.fangshan = None # 储存房山区的地址信息
+        self.tongzhou = None # 储存通州区的地址信息
+        self.shunyi = None # 储存顺义区的地址信息
+        self.changping = None # 储存昌平区的地址信息
+        self.daxing = None # 储存大兴区的地址信息
+        self.huairou = None # 储存怀柔区的地址信息
+        self.pinggu = None # 储存平谷区的地址信息
+        self.miyun = None # 储存密云区的地址信息
+        self.yanqing = None # 储存延庆区的地址信息
     
     # 函数用于读取txt文件中json格式的数据
     def load_data(self):
@@ -156,7 +174,7 @@ class VRPTW_model(object):
 
     # --------------------------------------------------------- #
     
-    # 过滤所有关于仓库的距离信息
+    # 过滤所有关于仓库的距离信息, 过滤self.distance_store
     def warehouse_leave_info(self, distance_store):
         distance_store_update = dict() # 用来过滤所有关于仓库的距离信息
         warehouse = self.warehouse["address"]
@@ -260,7 +278,7 @@ class VRPTW_model(object):
         else:
             return True
     
-    # 判断车载空间是否可行, helper function   
+    # 判断车载空间是否可行, helper function
     def volume_availble(self, check_volume):
         if (check_volume > self.vehicle_type["loadableVolume"]):
             return False
@@ -293,6 +311,11 @@ class VRPTW_model(object):
     
     # --------------------------------------------------------- #
     
+    # 划分distance_store中的信息, 通过区的名称分别加入不同的容器中, 只考虑address1和address2都在同一个区的情况
+    def distance_store_split(self, distance_store):
+        return None
+        
+    
     # main part: finding path algorithm
     # 城市之间的距离矩阵, self.calculate_distance()函数中已经计算过了
     def find_path(self):
@@ -304,7 +327,7 @@ if __name__ == "__main__":
     # 函数: load_data(), parse_data(), __str__()
     file = input("Type the name of the file: ").strip() # strip()函数用于去除字符串两端的空格
     order_data = VRPTW_model(file)
-    # print(order_data)
+    print(order_data)
         
     # 测试所有class中的基础函数
     def testbasic():
