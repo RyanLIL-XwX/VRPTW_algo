@@ -37,23 +37,24 @@ class VRPTW_model(object):
         self.set_receive_earliest_time = None # 设置最早收货时间
         self.set_receive_latest_time = None # 设置最晚收货时间
         
-        # 给信息划分并分别处理
-        self.dongcheng = None # 储存东城区的地址信息
-        self.xicheng = None # 储存西城区的地址信息
-        self.chaoyang = None # 储存朝阳区的地址信息
-        self.fengtai = None # 储存丰台区的地址信息
-        self.shijingshan = None # 储存石景山区的地址信息
-        self.haidian = None # 储存海淀区的地址信息
-        self.mentougou = None # 储存门头沟区的地址信息
-        self.fangshan = None # 储存房山区的地址信息
-        self.tongzhou = None # 储存通州区的地址信息
-        self.shunyi = None # 储存顺义区的地址信息
-        self.changping = None # 储存昌平区的地址信息
-        self.daxing = None # 储存大兴区的地址信息
-        self.huairou = None # 储存怀柔区的地址信息
-        self.pinggu = None # 储存平谷区的地址信息
-        self.miyun = None # 储存密云区的地址信息
-        self.yanqing = None # 储存延庆区的地址信息
+        # 给信息划分并分别处理, 全部都是和self.location_collect一样结构的数据
+        self.dongcheng = [] # 储存东城区的地址信息
+        self.xicheng = [] # 储存西城区的地址信息
+        self.chaoyang = [] # 储存朝阳区的地址信息
+        self.fengtai = [] # 储存丰台区的地址信息
+        self.shijingshan = [] # 储存石景山区的地址信息
+        self.haidian = [] # 储存海淀区的地址信息
+        self.mentougou = [] # 储存门头沟区的地址信息
+        self.fangshan = [] # 储存房山区的地址信息
+        self.tongzhou = [] # 储存通州区的地址信息
+        self.shunyi = [] # 储存顺义区的地址信息
+        self.changping = [] # 储存昌平区的地址信息
+        self.daxing = [] # 储存大兴区的地址信息
+        self.huairou = [] # 储存怀柔区的地址信息
+        self.pinggu = [] # 储存平谷区的地址信息
+        self.miyun = [] # 储存密云区的地址信息
+        self.yanqing = [] # 储存延庆区的地址信息
+        self.location_collect_split_district = [] # 储存划分后的地址信息
     
     # 函数用于读取txt文件中json格式的数据
     def load_data(self):
@@ -131,7 +132,7 @@ class VRPTW_model(object):
         location_collect = list()
         # warehouse
         if ("address" in self.warehouse.keys() and "latitude" in self.warehouse.keys() and "longitude" in self.warehouse.keys() and self.warehouse["address"] != None and self.warehouse["latitude"] != None and self.warehouse["longitude"] != None):
-            location_collect.append([self.warehouse["address"], float(self.warehouse["latitude"]), float(self.warehouse["longitude"])])
+            location_collect.append([self.warehouse["address"], float(self.warehouse["latitude"]), float(self.warehouse["longitude"]), "仓库"])
         else:
             print("No enough information for the warehouse.\n")
         # order_list
@@ -143,6 +144,7 @@ class VRPTW_model(object):
                 temp_list.append(self.order_list[i]["receivingAddress"])
                 temp_list.append(float(self.order_list[i]["receivingLatitude"]))
                 temp_list.append(float(self.order_list[i]["receivingLongitude"]))
+                temp_list.append(self.order_list[i]["receivingDistrict"])
                 location_collect.append(temp_list)
             else:
                 print("No enough information for the order list.\n")
@@ -311,29 +313,88 @@ class VRPTW_model(object):
     
     # --------------------------------------------------------- #
     
-    # 划分distance_store中的信息, 通过区的名称分别加入不同的容器中, 只考虑address1和address2都在同一个区的情况
-    def distance_store_split(self, distance_store):
-        return None
-        
-    
+    # 划分location_collect中的信息, 通过区的名称分别加入不同的容器中
+    def location_collect_split(self, location_collect):
+        for i in range(len(location_collect)):
+            if (location_collect[i][3] == "东城区" or location_collect[i][3] == "仓库"):
+                self.dongcheng.append(location_collect[i])
+            if (location_collect[i][3] == "西城区" or location_collect[i][3] == "仓库"):
+                self.xicheng.append(location_collect[i])
+            if (location_collect[i][3] == "朝阳区" or location_collect[i][3] == "仓库"):
+                self.chaoyang.append(location_collect[i])
+            if (location_collect[i][3] == "丰台区" or location_collect[i][3] == "仓库"):
+                self.fengtai.append(location_collect[i])
+            if (location_collect[i][3] == "石景山区" or location_collect[i][3] == "仓库"):
+                self.shijingshan.append(location_collect[i])
+            if (location_collect[i][3] == "海淀区" or location_collect[i][3] == "仓库"):
+                self.haidian.append(location_collect[i])
+            if (location_collect[i][3] == "门头沟区" or location_collect[i][3] == "仓库"):
+                self.mentougou.append(location_collect[i])
+            if (location_collect[i][3] == "房山区" or location_collect[i][3] == "仓库"):
+                self.fangshan.append(location_collect[i])
+            if (location_collect[i][3] == "通州区" or location_collect[i][3] == "仓库"):
+                self.tongzhou.append(location_collect[i])
+            if (location_collect[i][3] == "顺义区" or location_collect[i][3] == "仓库"):
+                self.shunyi.append(location_collect[i])
+            if (location_collect[i][3] == "昌平区" or location_collect[i][3] == "仓库"):
+                self.changping.append(location_collect[i])
+            if (location_collect[i][3] == "大兴区" or location_collect[i][3] == "仓库"):
+                self.daxing.append(location_collect[i])
+            if (location_collect[i][3] == "怀柔区" or location_collect[i][3] == "仓库"):
+                self.huairou.append(location_collect[i])
+            if (location_collect[i][3] == "平谷区" or location_collect[i][3] == "仓库"):
+                self.pinggu.append(location_collect[i])
+            if (location_collect[i][3] == "密云区" or location_collect[i][3] == "仓库"):
+                self.miyun.append(location_collect[i])
+            if (location_collect[i][3] == "延庆区" or location_collect[i][3] == "仓库"):
+                self.yanqing.append(location_collect[i])
+        self.location_collect_split_district.append(self.dongcheng)
+        self.location_collect_split_district.append(self.xicheng)
+        self.location_collect_split_district.append(self.chaoyang)
+        self.location_collect_split_district.append(self.fengtai)
+        self.location_collect_split_district.append(self.shijingshan)
+        self.location_collect_split_district.append(self.haidian)
+        self.location_collect_split_district.append(self.mentougou)
+        self.location_collect_split_district.append(self.fangshan)
+        self.location_collect_split_district.append(self.tongzhou)
+        self.location_collect_split_district.append(self.shunyi)
+        self.location_collect_split_district.append(self.changping)
+        self.location_collect_split_district.append(self.daxing)
+        self.location_collect_split_district.append(self.huairou)
+        self.location_collect_split_district.append(self.pinggu)
+        self.location_collect_split_district.append(self.miyun)
+        self.location_collect_split_district.append(self.yanqing)
+        return self.dongcheng, self.xicheng, self.chaoyang, self.fengtai, self.shijingshan, self.haidian, self.mentougou, self.fangshan, self.tongzhou, self.shunyi, self.changping, self.daxing, self.huairou, self.pinggu, self.miyun, self.yanqing
+            
     # main part: finding path algorithm
     # 城市之间的距离矩阵, self.calculate_distance()函数中已经计算过了
-    def find_path(self):
-        
-        return None
-
+    def find_path(self, distance_store):
+        distance_store_update_copy = self.warehouse_leave_info(distance_store).copy()
+        print(distance_store_update_copy)
+    
+    # 运行find_path()函数, 每次调用一个区的数据去进行最短路径的查找
+    def run_find_path(self):
+        for i in range(len(self.location_collect_split_district)):
+            # length为1说明没有别的任何地址, 只储存了最基础的仓库地址
+            if (len(self.location_collect_split_district[i]) != 1):
+                self.find_path(self.calculate_distance(self.location_collect_split_district[i]))
+            else:
+                continue
+                   
 if __name__ == "__main__":
     # 创建一个VRPTW_model对象, 并将file作为参数传入
     # 函数: load_data(), parse_data(), __str__()
     file = input("Type the name of the file: ").strip() # strip()函数用于去除字符串两端的空格
     order_data = VRPTW_model(file)
-    print(order_data)
+    # print(order_data)
         
     # 测试所有class中的基础函数
     def testbasic():
         #*
             # order data: VRPTW_model对象
-            # location_collect: list容器(lists of list): [[address, latitude, longitude], ...]
+            # location_collect: list容器(lists of list): [[address, latitude, longitude, district], ...]
+            # location_collect: 除了仓库的信息: [address, latitude, longitude, "仓库"]
+            #
             # distance_store: dictionary容器储存两点之间的距离: {距离: (address1, address2), ...}
             # distance_store_update: dictionary容器储存过滤后的两点之间的距离, 仅包含仓库的距离信息: {距离: (address1, address2), ...}
             # time_warehouse_leave: 仓库对特定地址的出发时间
@@ -347,6 +408,39 @@ if __name__ == "__main__":
         # print(location_collect)
         distance_store = order_data.calculate_distance(location_collect)
         # print(distance_store)
+        
+        # 测试对于location_collect中的信息的划分, 通过区的名称分别加入不同的容器中
+        # 函数: location_collect_split()
+        location_collect_dongcheng = []
+        location_collect_xiacheng = []
+        location_collect_chaoyang = []
+        location_collect_fengtai = []
+        location_collect_shijingshan = []
+        location_collect_haidian = []
+        location_collect_mentougou = []
+        location_collect_fangshan = []
+        location_collect_tongzhou = []
+        location_collect_shunyi = []
+        location_collect_changping = []
+        location_collect_daxing = []
+        location_collect_huairou = []
+        location_collect_pinggu = []
+        location_collect_miyun = []
+        location_collect_yanqing = []
+        location_collect_dongcheng, location_collect_xiacheng, location_collect_chaoyang, location_collect_fengtai,\
+            location_collect_shijingshan, location_collect_haidian, location_collect_mentougou, location_collect_fangshan,\
+            location_collect_tongzhou, location_collect_shunyi, location_collect_changping, location_collect_daxing,\
+            location_collect_huairou, location_collect_pinggu, location_collect_miyun, location_collect_yanqing\
+            = order_data.location_collect_split(location_collect)
+        # print(location_collect_dongcheng, "\n", location_collect_xiacheng, "\n", location_collect_chaoyang, "\n",\
+        #     location_collect_fengtai, "\n", location_collect_shijingshan, "\n", location_collect_haidian, "\n",\
+        #     location_collect_mentougou, "\n", location_collect_fangshan, "\n", location_collect_tongzhou, "\n",\
+        #     location_collect_shunyi, "\n", location_collect_changping, "\n", location_collect_daxing, "\n",\
+        #     location_collect_huairou, "\n", location_collect_pinggu, "\n", location_collect_miyun, "\n",\
+        #     location_collect_yanqing)
+        # print(order_data.location_collect_split_district)
+        distance_store_dongcheng = order_data.calculate_distance(location_collect_dongcheng)
+        # print(distance_store_dongcheng)
         
         # 测试对于仓库出发信息的收集
         # 函数: warehouse_leave_info()
@@ -430,11 +524,16 @@ if __name__ == "__main__":
             pass
         else:
             print("(2) calculate_leave_time() failed.")
+    
+    # 测试find_path函数
+    def test_find_path():
+        order_data.run_find_path()
 
     # run test cases
     def runtest():
         testbasic() # all pass
         testcase1() # all pass
+        test_find_path() # all pass
     
     runtest()
     
