@@ -418,13 +418,14 @@ class VRPTW_model(object):
         # 计算离开时间, 上一个订单的离开时间, 也就是往下一个订单的出发时间, 所以是start_time
         start_time = self.calculate_leave_time(single_stay_period, set_earliest_time)
             
-        # 对剩下的订单地址进行处理
+        # 接下来准备对剩下的订单地址进行处理, 不断的添加路径到shorest_path中, 并且保证时间, 重量, 体积可行
         distance_store_copy = distance_store.copy() # 用于储存所有的距离信息
         # 删除所有和仓库有关的距离信息, 因为我们已经不再需要了
         for i in distance_store.keys():
             if (distance_store[i][0] == self.warehouse["address"]):
                 del distance_store_copy[i]
         # print(distance_store_copy, "\n\n")
+        
         
         
         
