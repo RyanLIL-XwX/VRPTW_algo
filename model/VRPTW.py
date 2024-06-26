@@ -3,6 +3,7 @@
 import json
 from haversine import haversine, Unit # 用来计算两个经纬度之间的距离
 from datetime import datetime, timedelta # 用来计算时间
+import heapdict # dijkstra算法中使用的数据结构, 一种优先队列
 
 class VRPTW_model(object):
     def __init__(self, file_path):
@@ -425,8 +426,15 @@ class VRPTW_model(object):
             if (distance_store[i][0] == self.warehouse["address"]):
                 del distance_store_copy[i]
         # print(distance_store_copy, "\n\n")
-        
-        
+        # 开始创建图的邻接表表示法, 一个点到其他点的距离, 是一个dictionary容器: {address1: {address2: distance, address3: distance, ...}, ...}
+        graph = {}
+        for distance, (address1, address2) in distance_store.items():
+            if (address1 not in graph.keys()):
+                graph[address1] = {}
+            if (address2 not in graph.keys()):
+                graph[address2] = {}
+            graph[address1][address2] = distance
+            graph[address2][address1] = distance
         
         
     # 运行find_path()函数, 每次调用一个区的数据去进行最短路径的查找
@@ -437,35 +445,6 @@ class VRPTW_model(object):
                 self.find_path(self.calculate_distance(self.location_collect_split_district[i]))
             else:
                 continue
-    
-    # --------------------------------------------------------- #
-    
-    # # 下面这两个方程可以在算法中没有得到使用, 但是可能在后续的算法中得到使用
-    # # 收集每个订单的重量信息, 储存在字典中, keys为订单号, value为(重量, 收货地址)
-    # def collect_weight_info(self):
-    #     weight_collect = dict() # 用来收集每个订单的重量信息
-    #     for i in range(len(self.order_list)):
-    #         if ("orderCode" in self.order_list[i].keys() and "weight" in self.order_list[i].keys() and "receivingAddress" in self.order_list[i].keys() and self.order_list[i]["orderCode"] != None and self.order_list[i]["weight"] != None and self.order_list[i]["receivingAddress"] != None):
-    #             weight_collect[self.order_list[i]["orderCode"]] = [self.order_list[i]["weight"], self.order_list[i]["receivingAddress"]]
-    #         else:
-    #             print("No enough information for the weight info.\n")
-    #     self.weight_collect = weight_collect # 更新self.weight_collect属性
-    #     return self.weight_collect
-
-    # # 收集每个订单的停留时间信息, 储存在字典中
-    # def collect_stay_period_info(self, weight_collect):
-    #     stay_period_info = dict() # 用于存储每个订单的停留时间
-    #     for i in weight_collect.keys():
-    #         self.item_weight = weight_collect[i][0]
-    #         # 如果当前订单的收货地址不在stay_period_info中, 则将当前订单的停留时间和订单号添加到stay_period_info中
-    #         if (weight_collect[i][1] not in stay_period_info.keys()):
-    #             stay_period_info[weight_collect[i][1]] = [self.calculate_stay_period(self.item_weight), [i]]
-    #         # 如果当前订单的收货地址在stay_period_info中, 则将当前订单的停留时间和订单号添加到stay_period_info对应的keys中
-    #         else:
-    #             stay_period_info[weight_collect[i][1]][1].append(i)
-    #             # 更新当前订单的停留时间(单位: 分钟)
-    #             stay_period_info[weight_collect[i][1]][0] += self.calculate_stay_period(self.item_weight)
-    #     return stay_period_info
                    
 if __name__ == "__main__":
     # 创建一个VRPTW_model对象, 并将file作为参数传入
@@ -484,8 +463,6 @@ if __name__ == "__main__":
             # distance_store: dictionary容器储存两点之间的距离: {距离: (address1, address2), ...}
             # distance_store_update: dictionary容器储存过滤后的两点之间的距离, 仅包含仓库的距离信息: {距离: (address1, address2), ...}
             # time_warehouse_leave: 仓库对特定地址的出发时间
-            ## weight_collect: dictionary容器: {订单号: [重量, 收货地址]}
-            ## order_stay_period_info: dictionary容器储存每个订单的停留时间: {收货地址: [停留时间(单位: 分钟), [订单号1, 订单号2, ...]]}
         #*#
         
         # 测试对于经纬度信息的收集
@@ -550,14 +527,6 @@ if __name__ == "__main__":
         # print(single_receive_time)
         single_receive_latest_time = order_data.get_receive_latest_time("北京市昌平区南口镇陈庄村(京藏高速北侧)八达岭奥特莱斯F2")
         # print(single_receive_latest_time)
-        
-        # # 测试对于订单停留数间数据的收集
-        # # 函数: collect_weight_info(), collect_stay_period_info(), calculate_stay_period()
-        # weight_collect = order_data.collect_weight_info()
-        # # print(weight_collect)
-        # order_stay_period_info = order_data.collect_stay_period_info(weight_collect)
-        # # print(order_stay_period_info)
-        
     
     # 测试所有的helper function, 除了calculate_stay_period()
     # 函数: calculate_time(), weight_availble(), volume_availble(), calculate_arrive_time(), calculate_leave_time(), time_availble()
