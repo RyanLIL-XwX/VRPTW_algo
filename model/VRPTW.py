@@ -376,6 +376,44 @@ class VRPTW_model(object):
         return self.dongcheng, self.xicheng, self.chaoyang, self.fengtai, self.shijingshan, self.haidian, self.mentougou, self.fangshan, self.tongzhou, self.shunyi, self.changping, self.daxing, self.huairou, self.pinggu, self.miyun, self.yanqing
     
     # main part: finding path algorithm
+    
+    # dijkstra算法, 用于计算最短路径
+    def dijkstra(self, distance_store, start_address):
+        # 开始创建图的邻接表表示法, 一个点到其他点的距离, 是一个dictionary容器: 
+        # {address1: {address2: distance, address3: distance, ...}, ...}
+        graph = {}
+        for distance, (address1, address2) in distance_store.items():
+            if (address1 not in graph.keys()):
+                graph[address1] = {}
+            if (address2 not in graph.keys()):
+                graph[address2] = {}
+            graph[address1][address2] = distance
+            graph[address2][address1] = distance
+        # 初始化距离字典, 所有节点的初始距离为无穷大: float("inf")
+        distances = {node: float("inf") for node in graph}
+        distances[start_address] = 0  # 起点的距离为0
+        # 初始化前驱节点字典, 所有节点的前驱节点为None, 用于重建最短路径, 通过前驱字典, 我们可以从目标节点出发, 一步步回到起点, 从而重建出完整的最短路径.
+        previous_nodes = {node: None for node in graph}
+        # 初始化一个优先队列, 用于存储节点, 将起点加入队列
+        priority_queue = heapdict.heapdict()
+        priority_queue[start_address] = 0
+        dijkstra_path = list() # 用于储存dijkstra算法的最短路径
+        while priority_queue:
+            # 从优先队列中取出具有最小距离的节点
+            current_node, current_distance = priority_queue.popitem()
+            # 记录当前访问的节点
+            dijkstra_path.append(current_node)
+            # 遍历当前节点的所有邻居
+            for neighbor, distance_weight in graph[current_node].items():
+                distance = current_distance + distance_weight
+                # 如果经当前节点到达邻居节点的距离小于目前记录的距离, 则更新距离和前驱节点
+                if (distance < distances[neighbor]):
+                    distances[neighbor] = distance
+                    previous_nodes[neighbor] = current_node
+                    # heapdict结构会根据新的距离distance重新调整优先队列, 以确保队列中最小距离的节点在最前面
+                    priority_queue[neighbor] = distance
+        return dijkstra_path
+                 
     # 城市之间的距离矩阵, self.calculate_distance()函数中已经计算过了
     def find_path(self, distance_store):
         check_weight = 0.0 # 用于检查车载重量是否可行
@@ -425,26 +463,65 @@ class VRPTW_model(object):
         for i in distance_store.keys():
             if (distance_store[i][0] == self.warehouse["address"]):
                 del distance_store_copy[i]
-        # print(distance_store_copy, "\n\n")
-        # 开始创建图的邻接表表示法, 一个点到其他点的距离, 是一个dictionary容器: {address1: {address2: distance, address3: distance, ...}, ...}
+        
+        # 开始进行dijkstra算法, 用于计算最短路径
+        start_address = shorest_path[1]
+        # 开始创建图的邻接表表示法, 一个点到其他点的距离, 是一个dictionary容器: 
+        # {address1: {address2: distance, address3: distance, ...}, ...}
         graph = {}
-        for distance, (address1, address2) in distance_store.items():
+        for distance, (address1, address2) in distance_store_copy.items():
             if (address1 not in graph.keys()):
                 graph[address1] = {}
             if (address2 not in graph.keys()):
                 graph[address2] = {}
             graph[address1][address2] = distance
             graph[address2][address1] = distance
-        
-        
+        # 初始化距离字典, 所有节点的初始距离为无穷大: float("inf")
+        distances = {node: float("inf") for node in graph}
+        distances[start_address] = 0  # 起点的距离为0
+        # 初始化前驱节点字典, 所有节点的前驱节点为None, 用于重建最短路径, 通过前驱字典, 我们可以从目标节点出发, 一步步回到起点, 从而重建出完整的最短路径.
+        previous_nodes = {node: None for node in graph}
+        # 初始化一个优先队列, 用于存储节点, 将起点加入队列
+        priority_queue = heapdict.heapdict()
+        priority_queue[start_address] = 0
+        dijkstra_path = list() # 用于储存dijkstra算法的最短路径
+        while priority_queue:
+            count = 0
+            # 从优先队列中取出具有最小距离的节点
+            current_node, current_distance = priority_queue.popitem()
+            
+            check_weight = self.calculate_weight(current_node) # 计算车载重量
+            check_volume = self.calculate_volume(current_node) # 计算车载空间
+            single_stay_period = self.calculate_stay_period(check_weight) # 计算停留时间
+            if (self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True):
+                count += 1
+            
+            # 记录当前访问的节点
+            dijkstra_path.append(current_node)
+            # 遍历当前节点的所有邻居
+            for neighbor, distance_weight in graph[current_node].items():
+                distance = current_distance + distance_weight
+                # 如果经当前节点到达邻居节点的距离小于目前记录的距离, 则更新距离和前驱节点
+                if (distance < distances[neighbor]):
+                    distances[neighbor] = distance
+                    previous_nodes[neighbor] = current_node
+                    # heapdict结构会根据新的距离distance重新调整优先队列, 以确保队列中最小距离的节点在最前面
+                    priority_queue[neighbor] = distance
+        # 对最后的路径进行处理
+        shorest_path += dijkstra_path
+        shorest_path.pop(1) # 删除重复的第一个订单的地址
+        return shorest_path
+               
     # 运行find_path()函数, 每次调用一个区的数据去进行最短路径的查找
     def run_find_path(self):
+        all_path = list() # 用于储存所有的最短路径
         for i in range(len(self.location_collect_split_district)):
             # length为1说明没有别的任何地址, 只储存了最基础的仓库地址
             if (len(self.location_collect_split_district[i]) != 1):
-                self.find_path(self.calculate_distance(self.location_collect_split_district[i]))
+                all_path.append(self.find_path(self.calculate_distance(self.location_collect_split_district[i])))
             else:
                 continue
+        return all_path
                    
 if __name__ == "__main__":
     # 创建一个VRPTW_model对象, 并将file作为参数传入
@@ -613,7 +690,8 @@ if __name__ == "__main__":
     
     # 测试find_path函数
     def test_find_path():
-        order_data.run_find_path()
+        all_path = order_data.run_find_path()
+        print(all_path)
 
     # run test cases
     def runtest():
