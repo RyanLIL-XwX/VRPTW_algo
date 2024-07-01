@@ -4,6 +4,7 @@ import json
 from haversine import haversine, Unit # 用来计算两个经纬度之间的距离
 from datetime import datetime, timedelta # 用来计算时间
 import heapdict # dijkstra算法中使用的数据结构, 一种优先队列
+import folium # 用于绘制地图
 
 class VRPTW_model(object):
     def __init__(self, file_path):
@@ -196,7 +197,6 @@ class VRPTW_model(object):
                     temp_collect[first_order_address].append((self.order_list[i]["orderCode"], self.order_list[i]["receivingEarliestTime"]))
                 else:
                     temp_collect[first_order_address] = [(self.order_list[i]["orderCode"], self.order_list[i]["receivingEarliestTime"])]
-        # print(temp_collect)
         vehicle_speed = self.parameters["speed"] # 车辆的速度
         distance_between = 0 # 仓库于第一个订单之间的距离
         for i in self.distance_store_update.keys():
@@ -377,51 +377,11 @@ class VRPTW_model(object):
     
     # main part: finding path algorithm
     
-    # dijkstra算法, 用于计算最短路径
-    def dijkstra(self, distance_store, start_address):
-        # 开始创建图的邻接表表示法, 一个点到其他点的距离, 是一个dictionary容器: 
-        # {address1: {address2: distance, address3: distance, ...}, ...}
-        graph = {}
-        for distance, (address1, address2) in distance_store.items():
-            if (address1 not in graph.keys()):
-                graph[address1] = {}
-            if (address2 not in graph.keys()):
-                graph[address2] = {}
-            graph[address1][address2] = distance
-            graph[address2][address1] = distance
-        # 初始化距离字典, 所有节点的初始距离为无穷大: float("inf")
-        distances = {node: float("inf") for node in graph}
-        distances[start_address] = 0  # 起点的距离为0
-        # 初始化前驱节点字典, 所有节点的前驱节点为None, 用于重建最短路径, 通过前驱字典, 我们可以从目标节点出发, 一步步回到起点, 从而重建出完整的最短路径.
-        previous_nodes = {node: None for node in graph}
-        # 初始化一个优先队列, 用于存储节点, 将起点加入队列
-        priority_queue = heapdict.heapdict()
-        priority_queue[start_address] = 0
-        dijkstra_path = list() # 用于储存dijkstra算法的最短路径
-        while priority_queue:
-            # 从优先队列中取出具有最小距离的节点
-            current_node, current_distance = priority_queue.popitem()
-            # 记录当前访问的节点
-            dijkstra_path.append(current_node)
-            # 遍历当前节点的所有邻居
-            for neighbor, distance_weight in graph[current_node].items():
-                distance = current_distance + distance_weight
-                # 如果经当前节点到达邻居节点的距离小于目前记录的距离, 则更新距离和前驱节点
-                if (distance < distances[neighbor]):
-                    distances[neighbor] = distance
-                    previous_nodes[neighbor] = current_node
-                    # heapdict结构会根据新的距离distance重新调整优先队列, 以确保队列中最小距离的节点在最前面
-                    priority_queue[neighbor] = distance
-        return dijkstra_path
-                 
-    # 城市之间的距离矩阵, self.calculate_distance()函数中已经计算过了
-    def find_path(self, distance_store):
+    # 找到从仓库出发的第一个订单的地址
+    def get_first_order_address(self, distance_store):
         check_weight = 0.0 # 用于检查车载重量是否可行
         check_volume = 0.0 # 用于检查车载空间是否可行
-        set_earliest_time = "" # 用于储存最早收货时间
-        set_latest_time = "" # 用于储存最晚收货时间
-        shorest_path = list() # 用于储存最短路径
-        start_time = "" # 用于储存上一个地点的离开时间
+        path_record = [self.warehouse["address"]] # 用于储存warehouse和第一个订单的地址
         
         # 仅仅用于找到仓库和离仓库最近的收货地点
         distance_store_update_copy = self.warehouse_leave_info(distance_store).copy()
@@ -429,51 +389,36 @@ class VRPTW_model(object):
         # 通过排序可以得到从warehouse出发到其他订单地址的距离
         sorted_distance_store_update_copy = {key: distance_store_update_copy[key] for key in sorted_keys}
         for i in (sorted_distance_store_update_copy.keys()):
-            first_path = list()
-            first_path.append(i)
-            first_path.append(sorted_distance_store_update_copy[i])
-            break
-        shorest_path.append(first_path[1][0]) # 路径的第一个点: 仓库
-        shorest_path.append(first_path[1][1]) # 路径的第二个点: 离仓库最近的收货地点
-        
-        # 对基础的信息进行初始化并且检查weight, volume, time是否可行
-        # 针对第一个订单的地址
-        start_time = self.time_warehouse_leave(shorest_path[1]) # 计算仓库的离开时间
-        if (self.time_warehouse_leave_availble(start_time) == True):
-            pass
-        else:
-            print("The warehouse's leave time is not available.\n")
-            shorest_path.pop() # 删除离仓库最近的收货地点, 重新找寻路径
-        
-        check_weight = self.calculate_weight(shorest_path[1]) # 计算车载重量
-        check_volume = self.calculate_volume(shorest_path[1]) # 计算车载空间
-        single_stay_period = self.calculate_stay_period(check_weight) # 计算停留时间
-        if (self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True):
-            pass
-        else:
-            print("The weight or volume is not available.\n")
-            shorest_path.pop() # 删除离仓库最近的收货地点, 重新找寻路径
-        set_earliest_time = self.get_receive_earliest_time(shorest_path[1]) # 设置最早收货时间
-        # 计算离开时间, 上一个订单的离开时间, 也就是往下一个订单的出发时间, 所以是start_time
-        start_time = self.calculate_leave_time(single_stay_period, set_earliest_time)
-            
-        # 接下来准备对剩下的订单地址进行处理, 不断的添加路径到shorest_path中, 并且保证时间, 重量, 体积可行
-        distance_store_copy = distance_store.copy() # 用于储存所有的距离信息
-        # 删除所有和仓库有关的距离信息, 因为我们已经不再需要了
-        for i in distance_store.keys():
-            if (distance_store[i][0] == self.warehouse["address"]):
-                del distance_store_copy[i]
-        
-        # 开始进行dijkstra算法, 用于计算最短路径
-        start_address = shorest_path[1]
+            # 对基础的信息进行初始化并且检查weight, volume, time是否可行
+            # 针对第一个订单的地址
+            check_weight = self.calculate_weight(sorted_distance_store_update_copy[i][1]) # 计算车载重量
+            check_volume = self.calculate_volume(sorted_distance_store_update_copy[i][1]) # 计算车载空间
+            warehouse_leave_time = self.time_warehouse_leave(sorted_distance_store_update_copy[i][1]) # 计算仓库的离开时间
+            if (self.time_warehouse_leave_availble(warehouse_leave_time) == True and self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True):
+                path_record.append(sorted_distance_store_update_copy[i][1]) # 路径的第二个点: 离仓库最近的收货地点
+                break # 已经找到了满足条件的，并且离仓库最近的收货地点
+            else:
+                print("The warehouse's leave time is not available or the weight or volume is not available.\n")
+        return path_record[1]
+    
+    # dijkstra算法, 用于计算最短路径
+    def dijkstra(self, distance_store, start_address):
+        check_weight = 0.0 # 用于检查车载重量是否可行
+        check_volume = 0.0 # 用于检查车载空间是否可行
+        arrive_time = self.get_receive_earliest_time(start_address) # 到达当前订单的时间(分钟)
+        leave_time = "" # 离开当前订单的时间(分钟)
+        car_speed = self.parameters["speed"]
         # 开始创建图的邻接表表示法, 一个点到其他点的距离, 是一个dictionary容器: 
         # {address1: {address2: distance, address3: distance, ...}, ...}
         graph = {}
-        for distance, (address1, address2) in distance_store_copy.items():
+        check_visited = set() # 用于检查是否访问过
+        for distance, (address1, address2) in distance_store.items():
             if (address1 not in graph.keys()):
                 graph[address1] = {}
             if (address2 not in graph.keys()):
                 graph[address2] = {}
+            check_visited.add(address1)
+            check_visited.add(address2)
             graph[address1][address2] = distance
             graph[address2][address1] = distance
         # 初始化距离字典, 所有节点的初始距离为无穷大: float("inf")
@@ -485,17 +430,24 @@ class VRPTW_model(object):
         priority_queue = heapdict.heapdict()
         priority_queue[start_address] = 0
         dijkstra_path = list() # 用于储存dijkstra算法的最短路径
+        unvisited_nodes = set() # 用于储存未访问过的节点
+        # 接下来准备对剩下的订单地址进行处理, 不断的添加路径到dijkstra_path中, 并且保证时间, 重量, 体积可行
         while priority_queue:
-            count = 0
             # 从优先队列中取出具有最小距离的节点
             current_node, current_distance = priority_queue.popitem()
-            
-            check_weight = self.calculate_weight(current_node) # 计算车载重量
-            check_volume = self.calculate_volume(current_node) # 计算车载空间
-            single_stay_period = self.calculate_stay_period(check_weight) # 计算停留时间
+            # 开始进行时间, 重量, 体积的检查
+            check_weight += self.calculate_weight(current_node) # 计算车载重量
+            check_volume += self.calculate_volume(current_node) # 计算车载空间
+            arrive_time = self.calculate_arrive_time(arrive_time, round(current_distance / car_speed)) # 计算到达时间
+            leave_time = self.calculate_leave_time(self.calculate_stay_period(check_weight), arrive_time) # 计算离开时间
             if (self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True):
-                count += 1
-            
+                pass
+            else:
+                temp_check_visited = set(dijkstra_path) # 用于储存已经访问过的节点
+                unvisited_nodes = temp_check_visited.symmetric_difference(check_visited) # 用于储存未访问过的节点
+                unvisited_nodes = list(unvisited_nodes)
+                print("The weight or volume is not available.\n")
+                break
             # 记录当前访问的节点
             dijkstra_path.append(current_node)
             # 遍历当前节点的所有邻居
@@ -507,10 +459,39 @@ class VRPTW_model(object):
                     previous_nodes[neighbor] = current_node
                     # heapdict结构会根据新的距离distance重新调整优先队列, 以确保队列中最小距离的节点在最前面
                     priority_queue[neighbor] = distance
-        # 对最后的路径进行处理
-        shorest_path += dijkstra_path
-        shorest_path.pop(1) # 删除重复的第一个订单的地址
-        return shorest_path
+        return dijkstra_path, unvisited_nodes
+             
+    def find_path(self, distance_store):
+        dijkstra_path = [self.warehouse["address"]] # 用于储存dijkstra算法的最短路径
+        first_order_address = self.get_first_order_address(distance_store) # 获取第一个订单的地址
+        distance_store_copy = distance_store.copy() # 用于储存所有的距离信息
+        # 删除所有和仓库有关的距离信息, 因为我们已经不再需要了
+        for i in distance_store.keys():
+            if (distance_store[i][0] == self.warehouse["address"]):
+                del distance_store_copy[i]
+        # 开始进行dijkstra算法, 用于计算最短路径
+        dijkstra_path, unvisited_nodes = self.dijkstra(distance_store_copy, first_order_address)
+        while (len(unvisited_nodes) != 0):
+            # 创建一个新的字典, 用于存储满足条件的键值对
+            remain_distance_store = {}
+
+            # 遍历原始字典中的每一个键值对
+            for key, value in distance_store_copy.items():
+                # 检查路径中是否包含dijkstra_path的最后一位数据
+                all_addresses_valid = True
+                for address in value:
+                    if ((address != dijkstra_path[-1]) and (address not in unvisited_nodes)):
+                        all_addresses_valid = False
+                        break
+
+                # 如果所有地址都满足条件, 则保留该键值对
+                if (all_addresses_valid):
+                    remain_distance_store[key] = value
+            distance_store_copy = remain_distance_store.copy() # 更新distance_store_copy
+            current_path, unvisited_nodes = self.dijkstra(remain_distance_store, unvisited_nodes[0])
+            dijkstra_path += current_path
+            
+        return dijkstra_path
                
     # 运行find_path()函数, 每次调用一个区的数据去进行最短路径的查找
     def run_find_path(self):
@@ -688,10 +669,27 @@ if __name__ == "__main__":
         else:
             print("(3) time_warehouse_leave_availble() failed.")
     
+    # 绘制路径，保存为html
+    def plot_route(location_data, shortest_path, output_file='route_map.html'):
+        # 创建地图对象
+        m = folium.Map(location=location_data["warehouse"], zoom_start=12)
+
+        # 添加路径上的每个节点
+        for address in shortest_path:
+            folium.Marker(location=location_data[address], popup=address).add_to(m)
+
+        # 添加路径线
+        path_coordinates = [location_data[address] for address in shortest_path]
+        folium.PolyLine(locations=path_coordinates, color='blue').add_to(m)
+
+        # 保存并展示地图
+        m.save(output_file)
+        print(f"Map has been saved to {output_file}")
+    
     # 测试find_path函数
     def test_find_path():
         all_path = order_data.run_find_path()
-        print(all_path)
+        # print(all_path)
 
     # run test cases
     def runtest():
