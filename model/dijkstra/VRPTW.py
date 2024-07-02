@@ -313,6 +313,16 @@ class VRPTW_model(object):
         else:
             return False
     
+    # 判断到达时间是否可行, helper function
+    def time_arrive_availble(self, receive_earliest_time, arrive_time):
+        if (arrive_time >= receive_earliest_time):
+            return True
+    
+    # 判断离开时间是否可行, helper function
+    def time_leave_availble(self, receive_latest_time, leave_time):
+        if (leave_time <= receive_latest_time):
+            return True  
+    
     # 判断仓库的出发时间是否可行, helper function
     def time_warehouse_leave_availble(self, time_warehouse_leave):
         if (time_warehouse_leave >= self.warehouse["openTime"]):
@@ -438,9 +448,9 @@ class VRPTW_model(object):
             # 开始进行时间, 重量, 体积的检查
             check_weight += self.calculate_weight(current_node) # 计算车载重量
             check_volume += self.calculate_volume(current_node) # 计算车载空间
-            arrive_time = self.calculate_arrive_time(arrive_time, round(current_distance / car_speed)) # 计算到达时间
             leave_time = self.calculate_leave_time(self.calculate_stay_period(check_weight), arrive_time) # 计算离开时间
-            if (self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True):
+            arrive_time = self.calculate_arrive_time(leave_time, round(current_distance / car_speed)) # 计算到达时间
+            if (self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True and self.time_leave_availble(self.get_receive_latest_time(current_node), leave_time) == True):
                 pass
             else:
                 temp_check_visited = set(dijkstra_path) # 用于储存已经访问过的节点
@@ -448,6 +458,9 @@ class VRPTW_model(object):
                 unvisited_nodes = list(unvisited_nodes)
                 print("The weight or volume is not available.\n")
                 break
+            # 当到达时间小于最早收货时间时, 车子会进行等待
+            if (self.time_arrive_availble(self.get_receive_earliest_time(current_node), arrive_time) == False):
+                arrive_time = self.get_receive_earliest_time(current_node)
             # 记录当前访问的节点
             dijkstra_path.append(current_node)
             # 遍历当前节点的所有邻居
@@ -634,6 +647,26 @@ if __name__ == "__main__":
             pass
         else:
             print("(6) time_availble() failed.")
+        
+        # 测试time_arrive_availble()
+        if (order_data.time_arrive_availble("2024-01-01 08:00:00", "2024-01-01 08:00:00") == True):
+            pass
+        else:
+            print("(1) time_arrive_availble() failed.")
+        if (order_data.time_arrive_availble("2024-01-01 08:00:00", "2024-01-01 07:59:59") == False):
+            pass
+        else:
+            print("(2) time_arrive_availble() failed.")
+        
+        # 测试time_leave_availble()
+        if (order_data.time_leave_availble("2024-01-01 20:00:00", "2024-01-01 20:00:00") == True):
+            pass
+        else:
+            print("(1) time_leave_availble() failed.")
+        if (order_data.time_leave_availble("2024-01-01 20:00:00", "2024-01-01 20:00:01") == False):
+            pass
+        else:
+            print("(2) time_leave_availble() failed.")
         
         # 测试calculate_arrive_time()
         if (order_data.calculate_arrive_time("2024-01-01 21:00:00", 55) == "2024-01-01 21:55:00"):
