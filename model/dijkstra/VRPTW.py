@@ -313,15 +313,19 @@ class VRPTW_model(object):
         else:
             return False
     
-    # 判断到达时间是否可行, helper function
-    def time_arrive_availble(self, receive_earliest_time, arrive_time):
+    # 判断到达时间是否可行, 当到达时间早于最早送货时间时, helper function
+    def time_arrive_availble_earliest(self, receive_earliest_time, arrive_time):
         if (arrive_time >= receive_earliest_time):
             return True
+        else:
+            return False
     
-    # 判断离开时间是否可行, helper function
-    def time_leave_availble(self, receive_latest_time, leave_time):
-        if (leave_time <= receive_latest_time):
-            return True  
+    # 判断到达时间是否可行, 当到达时间超过最晚送货时间时, helper function
+    def time_arrive_availble_last(self, receive_latest_time, arrive_time):
+        if (arrive_time <= receive_latest_time):
+            return True
+        else:
+            return False
     
     # 判断仓库的出发时间是否可行, helper function
     def time_warehouse_leave_availble(self, time_warehouse_leave):
@@ -406,7 +410,7 @@ class VRPTW_model(object):
             warehouse_leave_time = self.time_warehouse_leave(sorted_distance_store_update_copy[i][1]) # 计算仓库的离开时间
             if (self.time_warehouse_leave_availble(warehouse_leave_time) == True and self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True):
                 path_record.append(sorted_distance_store_update_copy[i][1]) # 路径的第二个点: 离仓库最近的收货地点
-                break # 已经找到了满足条件的，并且离仓库最近的收货地点
+                break # 已经找到了满足条件的, 并且离仓库最近的收货地点
             else:
                 print("The warehouse's leave time is not available or the weight or volume is not available.\n")
         return path_record[1]
@@ -450,16 +454,16 @@ class VRPTW_model(object):
             check_volume += self.calculate_volume(current_node) # 计算车载空间
             leave_time = self.calculate_leave_time(self.calculate_stay_period(check_weight), arrive_time) # 计算离开时间
             arrive_time = self.calculate_arrive_time(leave_time, round(current_distance / car_speed)) # 计算到达时间
-            if (self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True and self.time_leave_availble(self.get_receive_latest_time(current_node), leave_time) == True):
+            if (self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True and self.time_arrive_availble_last(self.get_receive_latest_time(current_node), arrive_time) == True):
                 pass
             else:
                 temp_check_visited = set(dijkstra_path) # 用于储存已经访问过的节点
                 unvisited_nodes = temp_check_visited.symmetric_difference(check_visited) # 用于储存未访问过的节点
                 unvisited_nodes = list(unvisited_nodes)
-                print("The weight or volume is not available.\n")
+                print("The weight or volume or is not available.\n")
                 break
             # 当到达时间小于最早收货时间时, 车子会进行等待
-            if (self.time_arrive_availble(self.get_receive_earliest_time(current_node), arrive_time) == False):
+            if (self.time_arrive_availble_earliest(self.get_receive_earliest_time(current_node), arrive_time) == False):
                 arrive_time = self.get_receive_earliest_time(current_node)
             # 记录当前访问的节点
             dijkstra_path.append(current_node)
@@ -484,25 +488,25 @@ class VRPTW_model(object):
                 del distance_store_copy[i]
         # 开始进行dijkstra算法, 用于计算最短路径
         dijkstra_path, unvisited_nodes = self.dijkstra(distance_store_copy, first_order_address)
-        while (len(unvisited_nodes) != 0):
-            # 创建一个新的字典, 用于存储满足条件的键值对
-            remain_distance_store = {}
+        # while (len(unvisited_nodes) != 0):
+        #     # 创建一个新的字典, 用于存储满足条件的键值对
+        #     remain_distance_store = {}
 
-            # 遍历原始字典中的每一个键值对
-            for key, value in distance_store_copy.items():
-                # 检查路径中是否包含dijkstra_path的最后一位数据
-                all_addresses_valid = True
-                for address in value:
-                    if ((address != dijkstra_path[-1]) and (address not in unvisited_nodes)):
-                        all_addresses_valid = False
-                        break
+        #     # 遍历原始字典中的每一个键值对
+        #     for key, value in distance_store_copy.items():
+        #         # 检查路径中是否包含dijkstra_path的最后一位数据
+        #         all_addresses_valid = True
+        #         for address in value:
+        #             if ((address != dijkstra_path[-1]) and (address not in unvisited_nodes)):
+        #                 all_addresses_valid = False
+        #                 break
 
-                # 如果所有地址都满足条件, 则保留该键值对
-                if (all_addresses_valid):
-                    remain_distance_store[key] = value
-            distance_store_copy = remain_distance_store.copy() # 更新distance_store_copy
-            current_path, unvisited_nodes = self.dijkstra(remain_distance_store, unvisited_nodes[0])
-            dijkstra_path += current_path
+        #         # 如果所有地址都满足条件, 则保留该键值对
+        #         if (all_addresses_valid):
+        #             remain_distance_store[key] = value
+        #     distance_store_copy = remain_distance_store.copy() # 更新distance_store_copy
+        #     current_path, unvisited_nodes = self.dijkstra(remain_distance_store, unvisited_nodes[0])
+        #     dijkstra_path += current_path
             
         return dijkstra_path
                
@@ -516,221 +520,73 @@ class VRPTW_model(object):
             else:
                 continue
         return all_path
+    
+    # --------------------------------------------------------- #
+    
+    def plot_route_on_map(self, location_collect, shortest_path):
+        # 创建一个folium地图对象, 初始位置设为仓库的位置
+        map_center = [location_collect[0][1], location_collect[0][2]]
+        route_map = folium.Map(location=map_center, zoom_start=10)
+        
+        # 创建一个字典, 方便通过地址快速查找经纬度和区域
+        location_dict = {loc[0]: loc[1:] for loc in location_collect}
+        # print(location_dict)  # 调试输出
+        
+        # 为每条路径创建一个不同颜色的线条
+        colors = ["blue", "green", "purple", "orange", "darkred", "lightred", "beige", "darkblue", "darkgreen", "cadetblue", "darkpurple", "white", "pink", "lightblue", "lightgreen", "gray", "black"]
+        
+        # 遍历shortest_path中的每个子列表
+        # enumerate函数用于在遍历列表时, 同时获得元素的索引和值.
+        for index, path in enumerate(shortest_path):
+            # 存储路径的经纬度
+            route_coords = []
+            
+            # 通过地址查找经纬度并添加到路径坐标列表中
+            for address in path:
+                if (address in location_dict):
+                    latitude, longitude, district = location_dict[address]
+                    route_coords.append([latitude, longitude])
+                    print(f"Address: {address}, Lat: {latitude}, Lon: {longitude}, District: {district}")  # 调试输出
+                else:
+                    print(f"Address not found: {address}")  # 调试输出
+            
+            # 绘制路径
+            if (route_coords):
+                # 添加路径线条到地图, 并设置颜色, 宽度和透明度
+                folium.PolyLine(route_coords, color=colors[index % len(colors)], weight=5, opacity=0.8).add_to(route_map)
+                
+                # 为每个路径点添加标记
+                for coord, address in zip(route_coords, path):
+                    folium.Marker(location=coord, popup=address, icon=folium.Icon(color="red")).add_to(route_map)
+        
+        # 保存地图到文件
+        route_map.save("route_map.html")
                    
 if __name__ == "__main__":
     # 创建一个VRPTW_model对象, 并将file作为参数传入
     # 函数: load_data(), parse_data(), __str__()
     file = input("Type the name of the file: ").strip() # strip()函数用于去除字符串两端的空格
     order_data = VRPTW_model(file)
-    # print(order_data)
-        
-    # 测试所有class中的基础函数
-    def testbasic():
-        #*
-            # order data: VRPTW_model对象
-            # location_collect: list容器(lists of list): [[address, latitude, longitude, district], ...]
-            # location_collect: 除了仓库的信息: [address, latitude, longitude, "仓库"]
-            #
-            # distance_store: dictionary容器储存两点之间的距离: {距离: (address1, address2), ...}
-            # distance_store_update: dictionary容器储存过滤后的两点之间的距离, 仅包含仓库的距离信息: {距离: (address1, address2), ...}
-            # time_warehouse_leave: 仓库对特定地址的出发时间
-        #*#
-        
-        # 测试对于经纬度信息的收集
-        # 函数: collect_location_info(), calculate_distance()
+    # print(order_data) 
+    #*
+        # order data: VRPTW_model对象
+        # location_collect: list容器(lists of list): [[address, latitude, longitude, district], ...]
+        # location_collect: 除了仓库的信息: [address, latitude, longitude, "仓库"]
+        #
+        # distance_store: dictionary容器储存两点之间的距离: {距离: (address1, address2), ...}
+        # distance_store_update: dictionary容器储存过滤后的两点之间的距离, 仅包含仓库的距离信息: {距离: (address1, address2), ...}
+        # time_warehouse_leave: 仓库对特定地址的出发时间
+    #*#
+    
+    # 开始运行dijkstra算法, 并且找到最短路径, 再将路径绘制到地图上
+    def start_find_path():
         location_collect = order_data.collect_location_info()
         # print(location_collect)
-        distance_store = order_data.calculate_distance(location_collect)
-        # print(distance_store)
-        
-        # 测试对于location_collect中的信息的划分, 通过区的名称分别加入不同的容器中
-        # 函数: location_collect_split()
-        location_collect_dongcheng = []
-        location_collect_xiacheng = []
-        location_collect_chaoyang = []
-        location_collect_fengtai = []
-        location_collect_shijingshan = []
-        location_collect_haidian = []
-        location_collect_mentougou = []
-        location_collect_fangshan = []
-        location_collect_tongzhou = []
-        location_collect_shunyi = []
-        location_collect_changping = []
-        location_collect_daxing = []
-        location_collect_huairou = []
-        location_collect_pinggu = []
-        location_collect_miyun = []
-        location_collect_yanqing = []
-        location_collect_dongcheng, location_collect_xiacheng, location_collect_chaoyang, location_collect_fengtai,\
-            location_collect_shijingshan, location_collect_haidian, location_collect_mentougou, location_collect_fangshan,\
-            location_collect_tongzhou, location_collect_shunyi, location_collect_changping, location_collect_daxing,\
-            location_collect_huairou, location_collect_pinggu, location_collect_miyun, location_collect_yanqing\
-            = order_data.location_collect_split(location_collect)
-        # print(location_collect_dongcheng, "\n", location_collect_xiacheng, "\n", location_collect_chaoyang, "\n",\
-        #     location_collect_fengtai, "\n", location_collect_shijingshan, "\n", location_collect_haidian, "\n",\
-        #     location_collect_mentougou, "\n", location_collect_fangshan, "\n", location_collect_tongzhou, "\n",\
-        #     location_collect_shunyi, "\n", location_collect_changping, "\n", location_collect_daxing, "\n",\
-        #     location_collect_huairou, "\n", location_collect_pinggu, "\n", location_collect_miyun, "\n",\
-        #     location_collect_yanqing)
-        # print(order_data.location_collect_split_district)
-        distance_store_dongcheng = order_data.calculate_distance(location_collect_dongcheng)
-        # print(distance_store_dongcheng)
-        
-        # 测试对于仓库出发信息的收集
-        # 函数: warehouse_leave_info()
-        distance_store_update = order_data.warehouse_leave_info(distance_store)
-        # print(distance_store_update)
-        time_warehouse_leave = order_data.time_warehouse_leave("北京市昌平区南口镇陈庄村(京藏高速北侧)八达岭奥特莱斯F2")
-        # print(time_warehouse_leave)
-        
-        # 测试单个计算重量, 体积和停留时间的函数
-        # 函数: calculate_weight(), calculate_stay_period()
-        item_weight = order_data.calculate_weight("北京市昌平区南口镇陈庄村(京藏高速北侧)八达岭奥特莱斯F2")
-        # print(item_weight)
-        single_stay_period = order_data.calculate_stay_period(item_weight)
-        # print(single_stay_period)
-        item_volume = order_data.calculate_volume("北京市昌平区南口镇陈庄村(京藏高速北侧)八达岭奥特莱斯F2")
-        # print(item_volume)
-        
-        # 测试单个计算到达时间和离开时间的函数
-        # 函数: get_receive_earliest_time(), get_receive_latest_time()
-        single_receive_time = order_data.get_receive_earliest_time("北京市昌平区南口镇陈庄村(京藏高速北侧)八达岭奥特莱斯F2")
-        # print(single_receive_time)
-        single_receive_latest_time = order_data.get_receive_latest_time("北京市昌平区南口镇陈庄村(京藏高速北侧)八达岭奥特莱斯F2")
-        # print(single_receive_latest_time)
-    
-    # 测试所有的helper function, 除了calculate_stay_period()
-    # 函数: calculate_time(), weight_availble(), volume_availble(), calculate_arrive_time(), calculate_leave_time(), time_availble()
-    def testcase1():
-        # 测试weight_availble()
-        if (order_data.weight_availble(2.5) == True):
-            pass
-        else:
-            print("(1) weight_availble() failed.")
-        if (order_data.weight_availble(2.51) == False):
-            pass
-        else:
-            print("(2) weight_availble() failed.")
-            
-        # 测试volume_availble()
-        if (order_data.volume_availble(11.0) == True):
-            pass
-        else:
-            print("(1) volume_availble() failed.")
-        if (order_data.volume_availble(11.1) == False):
-            pass
-        else:
-            print("(2) volume_availble() failed.")
-        
-        # 测试time_availble()
-        if (order_data.time_availble("2024-01-01 08:00:00", "2024-01-01 20:00:00", "2024-01-01 08:00:00") == True):
-            pass
-        else:
-            print("(1) time_availble() failed.")
-        if (order_data.time_availble("2024-01-01 08:00:00", "2024-01-01 20:00:00", "2024-01-01 20:00:00") == True):
-            pass
-        else:
-            print("(2) time_availble() failed.")
-        if (order_data.time_availble("2024-01-01 08:00:00", "2024-01-01 20:00:00", "2024-01-01 07:59:59") == False):
-            pass
-        else:
-            print("(3) time_availble() failed.")
-        if (order_data.time_availble("2024-01-01 08:00:00", "2024-01-01 20:00:00", "2024-01-01 20:00:01") == False):
-            pass
-        else:
-            print("(4) time_availble() failed.")
-        if (order_data.time_availble("2024-01-01 08:00:00", "2024-01-01 20:00:00", "2023-01-01 15:00:00") == False):
-            pass
-        else:
-            print("(5) time_availble() failed.")
-        if (order_data.time_availble("2024-01-01 08:00:00", "2024-01-01 20:00:00", "2024-05-02 15:00:00") == False):
-            pass
-        else:
-            print("(6) time_availble() failed.")
-        
-        # 测试time_arrive_availble()
-        if (order_data.time_arrive_availble("2024-01-01 08:00:00", "2024-01-01 08:00:00") == True):
-            pass
-        else:
-            print("(1) time_arrive_availble() failed.")
-        if (order_data.time_arrive_availble("2024-01-01 08:00:00", "2024-01-01 07:59:59") == False):
-            pass
-        else:
-            print("(2) time_arrive_availble() failed.")
-        
-        # 测试time_leave_availble()
-        if (order_data.time_leave_availble("2024-01-01 20:00:00", "2024-01-01 20:00:00") == True):
-            pass
-        else:
-            print("(1) time_leave_availble() failed.")
-        if (order_data.time_leave_availble("2024-01-01 20:00:00", "2024-01-01 20:00:01") == False):
-            pass
-        else:
-            print("(2) time_leave_availble() failed.")
-        
-        # 测试calculate_arrive_time()
-        if (order_data.calculate_arrive_time("2024-01-01 21:00:00", 55) == "2024-01-01 21:55:00"):
-            pass
-        else:
-            print("(1) calculate_arrive_time() failed.")
-        if (order_data.calculate_arrive_time("2024-01-01 21:00:00", 65) == "2024-01-01 22:05:00"):
-            pass
-        else:
-            print("(2) calculate_arrive_time() failed.")
-        
-        # 测试calculate_leave_time()
-        if (order_data.calculate_leave_time(60, "2024-01-01 21:00:00") == "2024-01-01 22:00:00"):
-            pass
-        else:
-            print("(1) calculate_leave_time() failed.")
-        if (order_data.calculate_leave_time(500, "2024-01-01 21:00:00") == "2024-01-02 05:20:00"):
-            pass
-        else:
-            print("(2) calculate_leave_time() failed.")
-            
-        # 测试time_warehouse_leave_availble()
-        if (order_data.time_warehouse_leave_availble("2024-01-01 08:00:00") == True):
-            pass
-        else:
-            print("(1) time_warehouse_leave_availble() failed.")
-        if (order_data.time_warehouse_leave_availble("2023-12-31 00:00:00") == True):
-            pass
-        else:
-            print("(2) time_warehouse_leave_availble() failed.")
-        if (order_data.time_warehouse_leave_availble("2023-12-30 59:59:59") == False):
-            pass
-        else:
-            print("(3) time_warehouse_leave_availble() failed.")
-    
-    # 绘制路径，保存为html
-    def plot_route(location_data, shortest_path, output_file='route_map.html'):
-        # 创建地图对象
-        m = folium.Map(location=location_data["warehouse"], zoom_start=12)
-
-        # 添加路径上的每个节点
-        for address in shortest_path:
-            folium.Marker(location=location_data[address], popup=address).add_to(m)
-
-        # 添加路径线
-        path_coordinates = [location_data[address] for address in shortest_path]
-        folium.PolyLine(locations=path_coordinates, color='blue').add_to(m)
-
-        # 保存并展示地图
-        m.save(output_file)
-        print(f"Map has been saved to {output_file}")
-    
-    # 测试find_path函数
-    def test_find_path():
         all_path = order_data.run_find_path()
         # print(all_path)
+        order_data.plot_route_on_map(location_collect, all_path)
 
-    # run test cases
-    def runtest():
-        testbasic() # all pass
-        testcase1() # all pass
-        test_find_path() # all pass
-    
-    runtest()
+    start_find_path()
     
     
     
