@@ -154,6 +154,8 @@ class VRPTW_model(object):
     
     # 通过经纬度计算两点之间的距离
     def calculate_distance(self, location_collect):
+        if (len(location_collect) < 2):
+            raise ValueError("The number of locations is less than 2, please provide more locations.")
         distance_store = dict() # 使用字典来储存两点之间的距离
         pointer_a, pointer_b = 0, 1 # 用于指向当前订单的后一个订单
         while True:
@@ -164,10 +166,10 @@ class VRPTW_model(object):
                 # 如果后前针达到list的长度 - 1, 也就表示所有的地址之间的距离都被计算完毕
                 if (pointer_a == len(location_collect) - 1):
                     break
-            # 如果两个订单的地址相同, 则后指针指向下一个订单, 跳过当前计算
-            if (location_collect[pointer_a][0] == location_collect[pointer_b][0]):
-                pointer_b += 1
-                continue
+            # # 如果两个订单的地址相同, 则后指针指向下一个订单, 跳过当前计算
+            # if (location_collect[pointer_a][0] == location_collect[pointer_b][0]):
+            #     pointer_b += 1
+            #     continue
             # distance = ((a_lat, a_lon), (b_lat, b_lon), unit = Unit.KILOMETERS)
             distance_km = haversine((location_collect[pointer_a][1], location_collect[pointer_a][2]), (location_collect[pointer_b][1], location_collect[pointer_b][2]), unit=Unit.KILOMETERS)
             distance_store[distance_km] = (location_collect[pointer_a][0], location_collect[pointer_b][0])
@@ -460,7 +462,7 @@ class VRPTW_model(object):
                 temp_check_visited = set(dijkstra_path) # 用于储存已经访问过的节点
                 unvisited_nodes = temp_check_visited.symmetric_difference(check_visited) # 用于储存未访问过的节点
                 unvisited_nodes = list(unvisited_nodes)
-                print("The weight or volume or is not available.\n")
+                print("The weight or volume or arrive time is not available.\n")
                 break
             # 当到达时间小于最早收货时间时, 车子会进行等待
             if (self.time_arrive_availble_earliest(self.get_receive_earliest_time(current_node), arrive_time) == False):
@@ -488,25 +490,25 @@ class VRPTW_model(object):
                 del distance_store_copy[i]
         # 开始进行dijkstra算法, 用于计算最短路径
         dijkstra_path, unvisited_nodes = self.dijkstra(distance_store_copy, first_order_address)
-        # while (len(unvisited_nodes) != 0):
-        #     # 创建一个新的字典, 用于存储满足条件的键值对
-        #     remain_distance_store = {}
+        while (len(unvisited_nodes) != 0):
+            # 创建一个新的字典, 用于存储满足条件的键值对
+            remain_distance_store = {}
 
-        #     # 遍历原始字典中的每一个键值对
-        #     for key, value in distance_store_copy.items():
-        #         # 检查路径中是否包含dijkstra_path的最后一位数据
-        #         all_addresses_valid = True
-        #         for address in value:
-        #             if ((address != dijkstra_path[-1]) and (address not in unvisited_nodes)):
-        #                 all_addresses_valid = False
-        #                 break
+            # 遍历原始字典中的每一个键值对
+            for key, value in distance_store_copy.items():
+                # 检查路径中是否包含dijkstra_path的最后一位数据
+                all_addresses_valid = True
+                for address in value:
+                    if ((address != dijkstra_path[-1]) and (address not in unvisited_nodes)):
+                        all_addresses_valid = False
+                        break
 
-        #         # 如果所有地址都满足条件, 则保留该键值对
-        #         if (all_addresses_valid):
-        #             remain_distance_store[key] = value
-        #     distance_store_copy = remain_distance_store.copy() # 更新distance_store_copy
-        #     current_path, unvisited_nodes = self.dijkstra(remain_distance_store, unvisited_nodes[0])
-        #     dijkstra_path += current_path
+                # 如果所有地址都满足条件, 则保留该键值对
+                if (all_addresses_valid):
+                    remain_distance_store[key] = value
+            distance_store_copy = remain_distance_store.copy() # 更新distance_store_copy
+            current_path, unvisited_nodes = self.dijkstra(remain_distance_store, unvisited_nodes[0])
+            dijkstra_path += current_path
             
         return dijkstra_path
                
@@ -582,8 +584,9 @@ if __name__ == "__main__":
     def start_find_path():
         location_collect = order_data.collect_location_info()
         # print(location_collect)
+        order_data.location_collect_split(location_collect)
         all_path = order_data.run_find_path()
-        # print(all_path)
+        print(all_path)
         order_data.plot_route_on_map(location_collect, all_path)
 
     start_find_path()
