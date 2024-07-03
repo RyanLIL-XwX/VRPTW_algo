@@ -1,5 +1,5 @@
 # VRPTW
-# Author: Hanzhen Qin, Shenhan Xu
+# Author: Hanzhen Qin
 import json
 from haversine import haversine, Unit # 用来计算两个经纬度之间的距离
 from datetime import datetime, timedelta # 用来计算时间
@@ -130,7 +130,9 @@ class VRPTW_model(object):
     
     # 收集所有的经纬度信息和对应的地址, 包括order_list和warehouse
     def collect_location_info(self):
-        location_collect = list()
+        location_collect = list() # 使用list容器来储存经纬度信息
+        check_repreated = set() # 使用set容器来储存重复的地址
+        count = 2
         # warehouse
         if ("address" in self.warehouse.keys() and "latitude" in self.warehouse.keys() and "longitude" in self.warehouse.keys() and self.warehouse["address"] != None and self.warehouse["latitude"] != None and self.warehouse["longitude"] != None):
             location_collect.append([self.warehouse["address"], float(self.warehouse["latitude"]), float(self.warehouse["longitude"]), "仓库"])
@@ -139,14 +141,25 @@ class VRPTW_model(object):
         # order_list
         # list中的每个index对应一个订单, 0为receivingAddress, 1为receivingLatitude, 2为receivingLongitude
         for i in range(len(self.order_list)):
-            # 如果order_list中的当前index所在订单中包含receivingLatitude和receivingLongitude, 并且这两个值不为None, 则计算两点之间的距离
+            # 如果订单中有收货地址, 收货地址的经纬度和收货地址的区域信息, 并且这些信息不为空
             if ("receivingAddress" in self.order_list[i].keys() and "receivingLatitude" in self.order_list[i].keys() and "receivingLongitude" in self.order_list[i].keys() and self.order_list[i]["receivingLatitude"] != None and self.order_list[i]["receivingLongitude"] != None and self.order_list[i]["receivingAddress"] != None):
-                temp_list = list()
-                temp_list.append(self.order_list[i]["receivingAddress"])
-                temp_list.append(float(self.order_list[i]["receivingLatitude"]))
-                temp_list.append(float(self.order_list[i]["receivingLongitude"]))
-                temp_list.append(self.order_list[i]["receivingDistrict"])
-                location_collect.append(temp_list)
+                # 如果有重复的地址, 则在地址后面加上一个数字
+                if (self.order_list[i]["receivingAddress"] in check_repreated):
+                    temp_list = list()
+                    temp_list.append(self.order_list[i]["receivingAddress"] + "(" + str(count) + ")")
+                    temp_list.append(float(self.order_list[i]["receivingLatitude"]))
+                    temp_list.append(float(self.order_list[i]["receivingLongitude"]))
+                    temp_list.append(self.order_list[i]["receivingDistrict"])
+                    location_collect.append(temp_list)
+                    count += 1
+                else:
+                    temp_list = list()
+                    check_repreated.add(self.order_list[i]["receivingAddress"]) # 将当前地址加入到set容器中, 用于检查是否有重复的地址
+                    temp_list.append(self.order_list[i]["receivingAddress"])
+                    temp_list.append(float(self.order_list[i]["receivingLatitude"]))
+                    temp_list.append(float(self.order_list[i]["receivingLongitude"]))
+                    temp_list.append(self.order_list[i]["receivingDistrict"])
+                    location_collect.append(temp_list)
             else:
                 print("No enough information for the order list.\n")
         self.location_collect = location_collect # 更新self.location_collect属性
@@ -166,13 +179,11 @@ class VRPTW_model(object):
                 # 如果后前针达到list的长度 - 1, 也就表示所有的地址之间的距离都被计算完毕
                 if (pointer_a == len(location_collect) - 1):
                     break
-            # # 如果两个订单的地址相同, 则后指针指向下一个订单, 跳过当前计算
-            # if (location_collect[pointer_a][0] == location_collect[pointer_b][0]):
-            #     pointer_b += 1
-            #     continue
             # distance = ((a_lat, a_lon), (b_lat, b_lon), unit = Unit.KILOMETERS)
             distance_km = haversine((location_collect[pointer_a][1], location_collect[pointer_a][2]), (location_collect[pointer_b][1], location_collect[pointer_b][2]), unit=Unit.KILOMETERS)
-            distance_store[distance_km] = (location_collect[pointer_a][0], location_collect[pointer_b][0])
+            # distance_store[distance_km] = (location_collect[pointer_a][0], location_collect[pointer_b][0])
+            # 由于两个地址之间的距离可能会有重复, 所以需要将两个地址的名称组合成一个tuple, 作为key
+            distance_store[(location_collect[pointer_a][0], location_collect[pointer_b][0])] = distance_km
             pointer_b += 1
         self.distance_store = distance_store # 更新self.distance_store属性
         return self.distance_store
@@ -184,8 +195,8 @@ class VRPTW_model(object):
         distance_store_update = dict() # 用来过滤所有关于仓库的距离信息
         warehouse = self.warehouse["address"]
         for i in distance_store.keys():
-            if (distance_store[i][0] == warehouse):
-                distance_store_update[i] = (distance_store[i][0], distance_store[i][1])
+            if (i[0] == warehouse):
+                distance_store_update[i] = distance_store[i]
         self.distance_store_update = distance_store_update # 更新self.distance_store_update属性
         return self.distance_store_update
     
@@ -202,8 +213,8 @@ class VRPTW_model(object):
         vehicle_speed = self.parameters["speed"] # 车辆的速度
         distance_between = 0 # 仓库于第一个订单之间的距离
         for i in self.distance_store_update.keys():
-            if (self.distance_store_update[i][1] == first_order_address):
-                distance_between = i
+            if (i[1] == first_order_address):
+                distance_between = self.distance_store_update[i]
                 break
         # 计算仓库的出发时间
         delta_time = round((distance_between / vehicle_speed) * 60) # 将km/h转换为km/min, 并且保留整数部分
@@ -401,17 +412,16 @@ class VRPTW_model(object):
         
         # 仅仅用于找到仓库和离仓库最近的收货地点
         distance_store_update_copy = self.warehouse_leave_info(distance_store).copy()
-        sorted_keys = sorted(distance_store_update_copy.keys())
-        # 通过排序可以得到从warehouse出发到其他订单地址的距离
-        sorted_distance_store_update_copy = {key: distance_store_update_copy[key] for key in sorted_keys}
+        # 对distance_store_update_copy进行排序, 以便找到离仓库最近的收货地点
+        sorted_distance_store_update_copy = dict(sorted(distance_store_update_copy.items(), key=lambda item: item[1]))
         for i in (sorted_distance_store_update_copy.keys()):
             # 对基础的信息进行初始化并且检查weight, volume, time是否可行
             # 针对第一个订单的地址
-            check_weight = self.calculate_weight(sorted_distance_store_update_copy[i][1]) # 计算车载重量
-            check_volume = self.calculate_volume(sorted_distance_store_update_copy[i][1]) # 计算车载空间
-            warehouse_leave_time = self.time_warehouse_leave(sorted_distance_store_update_copy[i][1]) # 计算仓库的离开时间
+            check_weight = self.calculate_weight(i[1]) # 计算车载重量
+            check_volume = self.calculate_volume(i[1]) # 计算车载空间
+            warehouse_leave_time = self.time_warehouse_leave(i[1]) # 计算仓库的离开时间
             if (self.time_warehouse_leave_availble(warehouse_leave_time) == True and self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True):
-                path_record.append(sorted_distance_store_update_copy[i][1]) # 路径的第二个点: 离仓库最近的收货地点
+                path_record.append(i[1]) # 路径的第二个点: 离仓库最近的收货地点
                 break # 已经找到了满足条件的, 并且离仓库最近的收货地点
             else:
                 print("The warehouse's leave time is not available or the weight or volume is not available.\n")
@@ -419,22 +429,15 @@ class VRPTW_model(object):
     
     # dijkstra算法, 用于计算最短路径
     def dijkstra(self, distance_store, start_address):
-        check_weight = 0.0 # 用于检查车载重量是否可行
-        check_volume = 0.0 # 用于检查车载空间是否可行
-        arrive_time = self.get_receive_earliest_time(start_address) # 到达当前订单的时间(分钟)
-        leave_time = "" # 离开当前订单的时间(分钟)
-        car_speed = self.parameters["speed"]
+        print(distance_store)
         # 开始创建图的邻接表表示法, 一个点到其他点的距离, 是一个dictionary容器: 
         # {address1: {address2: distance, address3: distance, ...}, ...}
         graph = {}
-        check_visited = set() # 用于检查是否访问过
-        for distance, (address1, address2) in distance_store.items():
+        for (address1, address2), distance in distance_store.items():
             if (address1 not in graph.keys()):
                 graph[address1] = {}
             if (address2 not in graph.keys()):
                 graph[address2] = {}
-            check_visited.add(address1)
-            check_visited.add(address2)
             graph[address1][address2] = distance
             graph[address2][address1] = distance
         # 初始化距离字典, 所有节点的初始距离为无穷大: float("inf")
@@ -446,27 +449,10 @@ class VRPTW_model(object):
         priority_queue = heapdict.heapdict()
         priority_queue[start_address] = 0
         dijkstra_path = list() # 用于储存dijkstra算法的最短路径
-        unvisited_nodes = set() # 用于储存未访问过的节点
-        # 接下来准备对剩下的订单地址进行处理, 不断的添加路径到dijkstra_path中, 并且保证时间, 重量, 体积可行
+        # 接下来准备对剩下的订单地址进行处理, 不断的添加路径到dijkstra_path中
         while priority_queue:
             # 从优先队列中取出具有最小距离的节点
             current_node, current_distance = priority_queue.popitem()
-            # 开始进行时间, 重量, 体积的检查
-            check_weight += self.calculate_weight(current_node) # 计算车载重量
-            check_volume += self.calculate_volume(current_node) # 计算车载空间
-            leave_time = self.calculate_leave_time(self.calculate_stay_period(check_weight), arrive_time) # 计算离开时间
-            arrive_time = self.calculate_arrive_time(leave_time, round(current_distance / car_speed)) # 计算到达时间
-            if (self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True and self.time_arrive_availble_last(self.get_receive_latest_time(current_node), arrive_time) == True):
-                pass
-            else:
-                temp_check_visited = set(dijkstra_path) # 用于储存已经访问过的节点
-                unvisited_nodes = temp_check_visited.symmetric_difference(check_visited) # 用于储存未访问过的节点
-                unvisited_nodes = list(unvisited_nodes)
-                print("The weight or volume or arrive time is not available.\n")
-                break
-            # 当到达时间小于最早收货时间时, 车子会进行等待
-            if (self.time_arrive_availble_earliest(self.get_receive_earliest_time(current_node), arrive_time) == False):
-                arrive_time = self.get_receive_earliest_time(current_node)
             # 记录当前访问的节点
             dijkstra_path.append(current_node)
             # 遍历当前节点的所有邻居
@@ -478,7 +464,7 @@ class VRPTW_model(object):
                     previous_nodes[neighbor] = current_node
                     # heapdict结构会根据新的距离distance重新调整优先队列, 以确保队列中最小距离的节点在最前面
                     priority_queue[neighbor] = distance
-        return dijkstra_path, unvisited_nodes
+        return dijkstra_path
              
     def find_path(self, distance_store):
         dijkstra_path = [self.warehouse["address"]] # 用于储存dijkstra算法的最短路径
@@ -486,30 +472,10 @@ class VRPTW_model(object):
         distance_store_copy = distance_store.copy() # 用于储存所有的距离信息
         # 删除所有和仓库有关的距离信息, 因为我们已经不再需要了
         for i in distance_store.keys():
-            if (distance_store[i][0] == self.warehouse["address"]):
+            if (i[0] == self.warehouse["address"]):
                 del distance_store_copy[i]
         # 开始进行dijkstra算法, 用于计算最短路径
-        dijkstra_path, unvisited_nodes = self.dijkstra(distance_store_copy, first_order_address)
-        while (len(unvisited_nodes) != 0):
-            # 创建一个新的字典, 用于存储满足条件的键值对
-            remain_distance_store = {}
-
-            # 遍历原始字典中的每一个键值对
-            for key, value in distance_store_copy.items():
-                # 检查路径中是否包含dijkstra_path的最后一位数据
-                all_addresses_valid = True
-                for address in value:
-                    if ((address != dijkstra_path[-1]) and (address not in unvisited_nodes)):
-                        all_addresses_valid = False
-                        break
-
-                # 如果所有地址都满足条件, 则保留该键值对
-                if (all_addresses_valid):
-                    remain_distance_store[key] = value
-            distance_store_copy = remain_distance_store.copy() # 更新distance_store_copy
-            current_path, unvisited_nodes = self.dijkstra(remain_distance_store, unvisited_nodes[0])
-            dijkstra_path += current_path
-            
+        dijkstra_path = self.dijkstra(distance_store_copy, first_order_address)
         return dijkstra_path
                
     # 运行find_path()函数, 每次调用一个区的数据去进行最短路径的查找
@@ -522,6 +488,13 @@ class VRPTW_model(object):
             else:
                 continue
         return all_path
+    
+    def process_dijkstra_path(self, all_path):
+        check_weight = 0.0 # 用于检查车载重量是否可行
+        check_volume = 0.0 # 用于检查车载空间是否可行
+        # arrive_time = self.get_receive_earliest_time(start_address) # 到达当前订单的时间(分钟)
+        leave_time = "" # 离开当前订单的时间(分钟)
+        car_speed = self.parameters["speed"]
     
     # --------------------------------------------------------- #
     
@@ -548,9 +521,9 @@ class VRPTW_model(object):
                 if (address in location_dict):
                     latitude, longitude, district = location_dict[address]
                     route_coords.append([latitude, longitude])
-                    print(f"Address: {address}, Lat: {latitude}, Lon: {longitude}, District: {district}")  # 调试输出
-                else:
-                    print(f"Address not found: {address}")  # 调试输出
+                #     print(f"Address: {address}, Lat: {latitude}, Lon: {longitude}, District: {district}")  # 调试输出
+                # else:
+                #     print(f"Address not found: {address}")  # 调试输出
             
             # 绘制路径
             if (route_coords):
@@ -575,8 +548,8 @@ if __name__ == "__main__":
         # location_collect: list容器(lists of list): [[address, latitude, longitude, district], ...]
         # location_collect: 除了仓库的信息: [address, latitude, longitude, "仓库"]
         #
-        # distance_store: dictionary容器储存两点之间的距离: {距离: (address1, address2), ...}
-        # distance_store_update: dictionary容器储存过滤后的两点之间的距离, 仅包含仓库的距离信息: {距离: (address1, address2), ...}
+        # distance_store: dictionary容器储存两点之间的距离: {(address1, address2) : 距离, ...}
+        # distance_store_update: dictionary容器储存过滤后的两点之间的距离, 仅包含仓库的距离信息: {(address1, address2) : 距离, ...}
         # time_warehouse_leave: 仓库对特定地址的出发时间
     #*#
     
