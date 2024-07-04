@@ -429,7 +429,6 @@ class VRPTW_model(object):
     
     # dijkstra算法, 用于计算最短路径
     def dijkstra(self, distance_store, start_address):
-        print(distance_store)
         # 开始创建图的邻接表表示法, 一个点到其他点的距离, 是一个dictionary容器: 
         # {address1: {address2: distance, address3: distance, ...}, ...}
         graph = {}
@@ -454,7 +453,8 @@ class VRPTW_model(object):
             # 从优先队列中取出具有最小距离的节点
             current_node, current_distance = priority_queue.popitem()
             # 记录当前访问的节点
-            dijkstra_path.append(current_node)
+            # dijkstra_path.append(current_node)
+            dijkstra_path.append((current_node, current_distance))
             # 遍历当前节点的所有邻居
             for neighbor, distance_weight in graph[current_node].items():
                 distance = current_distance + distance_weight
@@ -475,6 +475,7 @@ class VRPTW_model(object):
             if (i[0] == self.warehouse["address"]):
                 del distance_store_copy[i]
         # 开始进行dijkstra算法, 用于计算最短路径
+        # dijkstra_path += self.dijkstra(distance_store_copy, first_order_address)
         dijkstra_path = self.dijkstra(distance_store_copy, first_order_address)
         return dijkstra_path
                
@@ -489,15 +490,43 @@ class VRPTW_model(object):
                 continue
         return all_path
     
+    # 处理dijkstra算法的路径, 用于检查车载重量, 车载空间和时间是否可行
     def process_dijkstra_path(self, all_path):
+        final_path = list() # 用于储存最终的路径
         check_weight = 0.0 # 用于检查车载重量是否可行
         check_volume = 0.0 # 用于检查车载空间是否可行
-        # arrive_time = self.get_receive_earliest_time(start_address) # 到达当前订单的时间(分钟)
+        arrive_time = "" # 到达当前订单的时间(分钟)
         leave_time = "" # 离开当前订单的时间(分钟)
         car_speed = self.parameters["speed"]
+        for order_path in all_path:
+            pointer = 0 # 用改指针来获取需要分离的路径
+            arrive_time = self.get_receive_earliest_time(order_path[0][0]) # 到达当前订单的时间(分钟)
+            for j in range(len(order_path)):
+                check_weight += self.calculate_weight(order_path[j][0]) # 计算车载重量
+                check_volume += self.calculate_volume(order_path[j][0]) # 计算车载空间
+                leave_time = self.calculate_leave_time(self.calculate_stay_period(check_weight), arrive_time) # 离开当前订单的时间(分钟)
+                arrive_time = self.calculate_arrive_time(leave_time, order_path[j][1] / car_speed) # 到达当前订单的时间(分钟
+                if (self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True and self.time_arrive_availble_last(self.get_receive_latest_time(order_path[j][0]), arrive_time) == True):
+                    pass
+                else:
+                    final_path.append(order_path[pointer:j])
+                    pointer = j
+                    check_weight = 0.0
+                    check_volume = 0.0
+                if (self.time_arrive_availble_earliest(self.get_receive_earliest_time(order_path[j][0]), arrive_time) == False):
+                    arrive_time = self.get_receive_earliest_time(order_path[j][0])
+         # Append the remaining path segment after the loop
+        if pointer < len(order_path):
+            final_path.append(order_path[pointer:])
+        processed_final_path = list() # 用于储存处理后的最终路径
+        for sublist in final_path:
+            addresses = [address for address, _ in sublist]
+            processed_final_path.append(addresses)
+        return processed_final_path
     
     # --------------------------------------------------------- #
     
+    # 将路径绘制到地图上
     def plot_route_on_map(self, location_collect, shortest_path):
         # 创建一个folium地图对象, 初始位置设为仓库的位置
         map_center = [location_collect[0][1], location_collect[0][2]]
@@ -555,12 +584,19 @@ if __name__ == "__main__":
     
     # 开始运行dijkstra算法, 并且找到最短路径, 再将路径绘制到地图上
     def start_find_path():
+        # 设置基础数据
         location_collect = order_data.collect_location_info()
         # print(location_collect)
+        distance_store = order_data.calculate_distance(location_collect)
+        # print(distance_store)
         order_data.location_collect_split(location_collect)
-        all_path = order_data.run_find_path()
-        print(all_path)
-        order_data.plot_route_on_map(location_collect, all_path)
+        
+        # 运行dijkstra算法, 并且找到最短路径, 再将路径绘制到地图上
+        dijkstra_path = order_data.run_find_path()
+        # print(dijkstra_path)
+        final_path = order_data.process_dijkstra_path(dijkstra_path)
+        print(final_path)
+        order_data.plot_route_on_map(location_collect, final_path)
 
     start_find_path()
     
