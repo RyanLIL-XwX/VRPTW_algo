@@ -184,6 +184,12 @@ if __name__ == "__main__":
             pass
         else:
             print("(3) time_warehouse_leave_availble() failed.")
+        
+        # 测试get_distance_warehouse_order()
+        if (order_data.get_distance_warehouse_order("北京市昌平区南口镇陈庄村(京藏高速北侧)八达岭奥特莱斯F2") == 38.93970268896342):
+            pass
+        else:
+            print("(1) get_distance_warehouse_order() failed.")
 
     # run test cases
     def runtest():

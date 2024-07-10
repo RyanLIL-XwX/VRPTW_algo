@@ -346,6 +346,12 @@ class VRPTW_model(object):
             return True
         else:
             return False
+        
+    # 得到仓库和该订单之间的距离, helper function
+    def get_distance_warehouse_order(self, order_address):
+        for i in self.distance_store_update.keys():
+            if (i[1] == order_address):
+                return self.distance_store_update[i]
     
     # --------------------------------------------------------- #
     
@@ -442,33 +448,34 @@ class VRPTW_model(object):
         # 初始化距离字典, 所有节点的初始距离为无穷大: float("inf")
         distances = {node: float("inf") for node in graph}
         distances[start_address] = 0  # 起点的距离为0
-        # 初始化前驱节点字典, 所有节点的前驱节点为None, 用于重建最短路径, 通过前驱字典, 我们可以从目标节点出发, 一步步回到起点, 从而重建出完整的最短路径.
-        previous_nodes = {node: None for node in graph}
         # 初始化一个优先队列, 用于存储节点, 将起点加入队列
         priority_queue = heapdict.heapdict()
         priority_queue[start_address] = 0
         dijkstra_path = list() # 用于储存dijkstra算法的最短路径
+        visited_order = list() # 用于储存已经访问过的订单地址
         # 接下来准备对剩下的订单地址进行处理, 不断的添加路径到dijkstra_path中
         while priority_queue:
             # 从优先队列中取出具有最小距离的节点
             current_node, current_distance = priority_queue.popitem()
             # 记录当前访问的节点
-            # dijkstra_path.append(current_node)
-            dijkstra_path.append((current_node, current_distance))
+            visited_order.append((current_node, current_distance))
             # 遍历当前节点的所有邻居
             for neighbor, distance_weight in graph[current_node].items():
                 distance = current_distance + distance_weight
                 # 如果经当前节点到达邻居节点的距离小于目前记录的距离, 则更新距离和前驱节点
                 if (distance < distances[neighbor]):
                     distances[neighbor] = distance
-                    previous_nodes[neighbor] = current_node
                     # heapdict结构会根据新的距离distance重新调整优先队列, 以确保队列中最小距离的节点在最前面
                     priority_queue[neighbor] = distance
+        sorted_distances = sorted(distances.items(), key=lambda x: x[1])
+        for i in sorted_distances:
+            dijkstra_path.append((i[0], i[1]))
         return dijkstra_path
              
     def find_path(self, distance_store):
         dijkstra_path = list() # 用于储存dijkstra算法的最短路径
         first_order_address = self.get_first_order_address(distance_store) # 获取第一个订单的地址
+        # dijkstra_path.append((self.warehouse["address"], self.get_distance_warehouse_order(first_order_address))) # 仓库和第一个订单的距离
         distance_store_copy = distance_store.copy() # 用于储存所有的距离信息
         # 删除所有和仓库有关的距离信息, 因为我们已经不再需要了
         for i in distance_store.keys():
@@ -493,148 +500,103 @@ class VRPTW_model(object):
     # 处理dijkstra算法的路径, 用于检查车载重量, 车载空间和时间是否可行
     def process_dijkstra_path(self, all_path):
         final_path = list() # 用于储存最终的路径
-        check_weight = 0.0 # 用于检查车载重量是否可行
-        check_volume = 0.0 # 用于检查车载空间是否可行
-        arrive_time = "" # 到达当前订单的时间(分钟)
-        leave_time = "" # 离开当前订单的时间(分钟)
         car_speed = self.parameters["speed"]
+        pass_address = list() # 用于储存已经经过的地址
         for order_path in all_path:
+            check_weight = 0.0 # 用于检查车载重量是否可行
+            check_volume = 0.0 # 用于检查车载空间是否可行
+            arrive_time = "" # 到达当前订单的时间(分钟)
+            leave_time = "" # 离开当前订单的时间(分钟)
             pointer = 0 # 用改指针来获取需要分离的路径
-            arrive_time = self.get_receive_earliest_time(order_path[0][0]) # 到达当前订单的时间(分钟)
+            arrive_time = self.get_receive_earliest_time(order_path[1][0]) # 到达当前订单的时间(分钟)
             for j in range(len(order_path)):
-                check_weight += self.calculate_weight(order_path[j][0]) # 计算车载重量
-                check_volume += self.calculate_volume(order_path[j][0]) # 计算车载空间
+                address, distance = order_path[j]
+                check_weight += self.calculate_weight(address) # 计算车载重量
+                check_volume += self.calculate_volume(address) # 计算车载空间
                 leave_time = self.calculate_leave_time(self.calculate_stay_period(check_weight), arrive_time) # 离开当前订单的时间(分钟)
-                arrive_time = self.calculate_arrive_time(leave_time, order_path[j][1] / car_speed) # 到达当前订单的时间(分钟
-                if (self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True and self.time_arrive_availble_last(self.get_receive_latest_time(order_path[j][0]), arrive_time) == True):
-                    pass
+                arrive_time = self.calculate_arrive_time(leave_time, distance / car_speed) # 到达当前订单的时间(分钟
+                if (self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True and self.time_arrive_availble_last(self.get_receive_latest_time(address), arrive_time) == True):
+                    pass     
                 else:
                     final_path.append(order_path[pointer:j])
                     pointer = j
                     check_weight = 0.0
                     check_volume = 0.0
-                if (self.time_arrive_availble_earliest(self.get_receive_earliest_time(order_path[j][0]), arrive_time) == False):
-                    arrive_time = self.get_receive_earliest_time(order_path[j][0])
-<<<<<<< HEAD
-         # Append the remaining path segment after the loop
-        if pointer < len(order_path):
-            final_path.append(order_path[pointer:])
-        processed_final_path = list() # 用于储存处理后的最终路径
-        for sublist in final_path:
-            addresses = [address for address, _ in sublist]
-            processed_final_path.append(addresses)
-        return processed_final_path
-    
-    # --------------------------------------------------------- #
-    
-    # 将路径绘制到地图上
-=======
+                if (self.time_arrive_availble_earliest(self.get_receive_earliest_time(address), arrive_time) == False):
+                    arrive_time = self.get_receive_earliest_time(address)
             # Append the remaining path segment after the loop
             if pointer < len(order_path):
                 final_path.append(order_path[pointer:])
+            # if (len(pass_address) != 0):
+            #     final_path += self.process_dijkstra_path(pass_address)
         processed_final_path = list() # 用于储存处理后的最终路径
-        
-        distance = 0 # 记录最终路径的总距离
+        distance_record = 0 # 记录最终路径的总距离
         for i in final_path:
-            for j in i:
-                distance += j[1]
-        
+            for j in range(len(i)):
+                distance_record += i[j][1]
+        # 将final_path中的元素提取出来, 并且将其转换为一个list
         for sublist in final_path:
             addresses = [address for address, _ in sublist]
             processed_final_path.append(addresses)
         for i in processed_final_path:
             if (len(i) == 0):
                 processed_final_path.remove(i)
-        return processed_final_path, distance
+        return processed_final_path, distance_record
     
+    def calculate_info(self, processed_final_path):
+        weight_utilization = list() # 用于储存车载重量的利用率
+        weight_record = 0.0 # 用于检查车载重量是否可行
+        volume_utilization = list() # 用于储存车载空间的利用率
+        volume_record = 0.0 # 用于检查车载空间是否可行
+        max_weight = self.vehicle_type["loadableWeight"] # 车辆的最大载重量
+        max_volume = self.vehicle_type["loadableVolume"] # 车辆的最大载重量
+        for i in processed_final_path:
+            for j in i:
+                weight_record += self.calculate_weight(j)
+                volume_record += self.calculate_volume(j)
+            weight_utilization.append(max_weight / weight_record)
+            volume_utilization.append(max_volume / volume_record)
+        number = 0
+        for i in weight_utilization:
+            number += 1
+            print("The weight utilization for car {}: {:.2f}%".format(number, i * 100))
+        number = 0
+        for i in volume_utilization:
+            number += 1
+            print("The volume utilization for car {}: {:.2f}%".format(number, i * 100))
+        
     # --------------------------------------------------------- #
-    
-    # # 将路径绘制到地图上
-    # def plot_route_on_map(self, location_collect, shortest_path):
-    #     # 创建一个folium地图对象, 初始位置设为仓库的位置
-    #     map_center = [location_collect[0][1], location_collect[0][2]]
-    #     route_map = folium.Map(location=map_center, zoom_start=10)
-        
-    #     # 创建一个字典, 方便通过地址快速查找经纬度和区域
-    #     location_dict = {loc[0]: loc[1:] for loc in location_collect}
-    #     # print(location_dict)  # 调试输出
-        
-    #     # 为每条路径创建一个不同颜色的线条
-    #     colors = ["blue", "green", "purple", "orange", "darkred", "lightred", "beige", "darkblue", "darkgreen", "cadetblue", "darkpurple", "white", "pink", "lightblue", "lightgreen", "gray", "black"]
-        
-    #     # 遍历shortest_path中的每个子列表
-    #     # enumerate函数用于在遍历列表时, 同时获得元素的索引和值.
-    #     for index, path in enumerate(shortest_path):
-    #         # 存储路径的经纬度
-    #         route_coords = []
-            
-    #         # 通过地址查找经纬度并添加到路径坐标列表中
-    #         for address in path:
-    #             if (address in location_dict):
-    #                 latitude, longitude, district = location_dict[address]
-    #                 route_coords.append([latitude, longitude])
-    #             #     print(f"Address: {address}, Lat: {latitude}, Lon: {longitude}, District: {district}")  # 调试输出
-    #             # else:
-    #             #     print(f"Address not found: {address}")  # 调试输出
-            
-    #         # 绘制路径
-    #         if (route_coords):
-    #             # 添加路径线条到地图, 并设置颜色, 宽度和透明度
-    #             folium.PolyLine(route_coords, color=colors[index % len(colors)], weight=5, opacity=0.8).add_to(route_map)
-                
-    #             # 为每个路径点添加标记
-    #             for coord, address in zip(route_coords, path):
-    #                 folium.Marker(location=coord, popup=address, icon=folium.Icon(color="red")).add_to(route_map)
-        
-    #     # 保存地图到文件
-    #     route_map.save("route_map.html")
-    
->>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
+
     def plot_route_on_map(self, location_collect, shortest_path):
+        self.calculate_info(shortest_path) # 打印车载重量和车载空间的利用率
         # 创建一个folium地图对象, 初始位置设为仓库的位置
         map_center = [location_collect[0][1], location_collect[0][2]]
-        route_map = folium.Map(location=map_center, zoom_start=10)
+        route_map = folium.Map(location=map_center, zoom_start=10, tiles=None)
+
+        # 添加黑色背景
+        folium.TileLayer(
+            tiles='https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+            attr='Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.',
+            name='Dark Background',
+            control=False,
+            overlay=True
+        ).add_to(route_map)
         
         # 创建一个字典, 方便通过地址快速查找经纬度和区域
         location_dict = {loc[0]: loc[1:] for loc in location_collect}
-<<<<<<< HEAD
-        # print(location_dict)  # 调试输出
-=======
->>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
         
         # 为每条路径创建一个不同颜色的线条
         colors = ["blue", "green", "purple", "orange", "darkred", "lightred", "beige", "darkblue", "darkgreen", "cadetblue", "darkpurple", "white", "pink", "lightblue", "lightgreen", "gray", "black"]
         
         # 遍历shortest_path中的每个子列表
-<<<<<<< HEAD
-        # enumerate函数用于在遍历列表时, 同时获得元素的索引和值.
-=======
->>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
         for index, path in enumerate(shortest_path):
             # 存储路径的经纬度
             route_coords = []
             
             # 通过地址查找经纬度并添加到路径坐标列表中
             for address in path:
-<<<<<<< HEAD
-                if (address in location_dict):
-                    latitude, longitude, district = location_dict[address]
-                    route_coords.append([latitude, longitude])
-                #     print(f"Address: {address}, Lat: {latitude}, Lon: {longitude}, District: {district}")  # 调试输出
-                # else:
-                #     print(f"Address not found: {address}")  # 调试输出
-            
-            # 绘制路径
-            if (route_coords):
-                # 添加路径线条到地图, 并设置颜色, 宽度和透明度
-                folium.PolyLine(route_coords, color=colors[index % len(colors)], weight=5, opacity=0.8).add_to(route_map)
-                
-                # 为每个路径点添加标记
-                for coord, address in zip(route_coords, path):
-                    folium.Marker(location=coord, popup=address, icon=folium.Icon(color="red")).add_to(route_map)
-=======
                 if address in location_dict:
-                    latitude, longitude, district = location_dict[address]
+                    latitude, longitude, _ = location_dict[address]
                     route_coords.append([latitude, longitude])
             
             # 绘制路径
@@ -651,10 +613,9 @@ class VRPTW_model(object):
                         fill=True,
                         fill_color=colors[index % len(colors)],
                         fill_opacity=0.8,
-                        popup=address
+                        popup=folium.Popup(f'<div style="white-space: nowrap;">{address}</div>', max_width=300)
                     ).add_to(route_map)
->>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
-        
+            
         # 保存地图到文件
         route_map.save("route_map.html")
                    
@@ -685,17 +646,10 @@ if __name__ == "__main__":
         
         # 运行dijkstra算法, 并且找到最短路径, 再将路径绘制到地图上
         dijkstra_path = order_data.run_find_path()
-<<<<<<< HEAD
         # print(dijkstra_path)
-        final_path = order_data.process_dijkstra_path(dijkstra_path)
-        print(final_path)
-=======
-        print(dijkstra_path)
         final_path, distance = order_data.process_dijkstra_path(dijkstra_path)
-        # print("Distance of dijkstra: {0:.2f}km".format(distance))
         # print(final_path)
-        # print("Car: {}".format(len(final_path)))
->>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
+        print("Distance of dijkstra: {:.2f}km and Car using: {}".format(distance, len(final_path)))
         order_data.plot_route_on_map(location_collect, final_path)
 
     start_find_path()
