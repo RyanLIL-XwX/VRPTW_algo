@@ -1,3 +1,4 @@
+import heapq
 from typing import List, Dict, Tuple
 from collections.abc import Set
 from datetime import datetime, timedelta
@@ -6,7 +7,6 @@ import copy
 from Order import Order, cluster_orders_hierarchical
 from Vehicle import Vehicle
 from Data_loader import group_orders_by_cluster, classify_orders_by_district
-
 
 
 def calculate_time(current_time: str, minutes: int, mode: str) -> str:
@@ -70,13 +70,62 @@ def get_sorted_orders_by_distance(orders: List[Order], current_location: Order,
     return order_distances
 
 
+def dijkstra(distances: Dict[Tuple[Order, Order], float], current_location: Order) -> List[Tuple[float, Order]]:
+    """
+    使用 Dijkstra 算法计算从起点到所有节点的最短路径，并返回访问所有节点的顺序列表。
+
+    :param distances: 一个字典，键是两个 Order 对象的元组，值是它们之间的距离
+    :param current_location: 起始 Order 对象
+    :return: 从起点访问所有其他节点的顺序列表，每个元素是一个元组，包含距离和 Order 对象
+    """
+    # 创建图的邻接表表示法
+    graph = {}
+    for (order1, order2), distance in distances.items():
+        if order1 not in graph:
+            graph[order1] = {}
+        if order2 not in graph:
+            graph[order2] = {}
+        graph[order1][order2] = distance
+        graph[order2][order1] = distance
+
+    # 初始化距离字典，所有节点的初始距离为无穷大（假设为 float('inf')）
+    distances_from_start = {order: float('inf') for order in graph}
+    distances_from_start[current_location] = 0  # 起点的距离为 0
+
+    # 初始化优先队列
+    priority_queue = [(0, current_location)]  # (距离, Order对象)
+    heapq.heapify(priority_queue)
+
+    visited = set()
+    order_of_visit = []
+
+    while priority_queue:
+        current_distance, current_order = heapq.heappop(priority_queue)
+
+        if current_order in visited:
+            continue
+
+        visited.add(current_order)
+        order_of_visit.append((current_distance, current_order))
+
+        for neighbor, distance in graph[current_order].items():
+            if neighbor in visited:
+                continue
+            new_distance = current_distance + distance
+            if new_distance < distances_from_start[neighbor]:
+                distances_from_start[neighbor] = new_distance
+                heapq.heappush(priority_queue, (new_distance, neighbor))
+
+    return order_of_visit
+
+
 def create_new_vehicle(visited: Set[Order], orders: List[Order], warehouse: Order, header: dict,
                        distances: Dict[Tuple[Order, Order], float]) -> Vehicle:
     vehicle = Vehicle(
         max_weight=header['max_weight'],
         max_volume=header['max_volume']
     )
-    sorted_from_warehouse = get_sorted_orders_by_distance(orders, warehouse, distances)
+    sorted_from_warehouse = dijkstra(distances, warehouse)
 
     for distance, order in sorted_from_warehouse:
         if order not in visited:
@@ -91,7 +140,7 @@ def create_new_vehicle(visited: Set[Order], orders: List[Order], warehouse: Orde
     return vehicle
 
 
-def greedy_algorithm(orders: List[Order], header: dict):
+def find_paths(orders: List[Order], header: dict):
     vehicles = []
 
     warehouse = Order(
@@ -112,7 +161,7 @@ def greedy_algorithm(orders: List[Order], header: dict):
 
     list_of_list = classify_orders_by_district(orders)
 
-    for district, orders in clusters.items():
+    for district, orders in list_of_list.items():
         if not orders:
             continue
         distances = precompute_distances(orders, warehouse)
@@ -128,7 +177,7 @@ def greedy_algorithm(orders: List[Order], header: dict):
 
         current_order = current_vehicle.get_current_order()
         while len(orders) != len(visited):  # 还有没送完的订单
-            sorted_orders = get_sorted_orders_by_distance(orders, current_order, distances)
+            sorted_orders = dijkstra(distances, current_order)
             for distance, order in sorted_orders:
                 commute_time = timedelta(minutes=(distance / 40 * 60))
                 if order not in visited and current_vehicle.time_check(commute_time,

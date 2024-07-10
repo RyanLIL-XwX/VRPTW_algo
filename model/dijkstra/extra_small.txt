@@ -1,0 +1,83 @@
+{
+  "input": {
+    "forceMerge": "Y",
+    "handOverTimeBy": "Weight",
+    "orderList": [
+      {
+        "areaId": [
+          10785
+        ],
+        "deliveryAddress": "北京市顺义区顺平路576号",
+        "deliveryEarliestTime": "2024-01-01 20:00:00",
+        "deliveryLatestTime": "2024-01-01 20:00:00",
+        "lineId": 0,
+        "orderCode": "ROX240101000000001",
+        "pointType": 0,
+        "receivingAddress": "北京市密云县古北口镇司马台村国际休闲旅游度假区第一层101单元",
+        "receivingCity": "北京市辖区",
+        "receivingDistrict": "密云区",
+        "receivingEarliestTime": "2024-01-01 21:00:00",
+        "receivingLatestTime": "2024-01-02 07:00:00",
+        "receivingLatitude": "40.662436",
+        "receivingLongitude": "117.251497",
+        "receivingProvince": "北京市",
+        "siteSeq": 0,
+        "volume": 0.333901,
+        "weight": 0.0954,
+        "workTime": 0
+      },
+      {
+        "areaId": [
+          10785
+        ],
+        "deliveryAddress": "北京市顺义区顺平路576号",
+        "deliveryEarliestTime": "2024-01-01 20:00:00",
+        "deliveryLatestTime": "2024-01-01 20:00:00",
+        "lineId": 0,
+        "orderCode": "ROX240101000000363",
+        "pointType": 0,
+        "receivingAddress": "北京市大兴区区西红门宏福路鸿坤生活广场",
+        "receivingCity": "北京市辖区",
+        "receivingDistrict": "大兴区",
+        "receivingEarliestTime": "2024-01-01 21:00:00",
+        "receivingLatestTime": "2024-01-02 07:00:00",
+        "receivingLatitude": "39.797382",
+        "receivingLongitude": "116.346796",
+        "receivingProvince": "北京市",
+        "siteSeq": 0,
+        "volume": 0.347923,
+        "weight": 0.099406,
+        "workTime": 0
+      }
+    ],
+    "parameter": {
+      "CenterLineDistanceLimit": 0.0,
+      "DC": 1.5,
+      "allowDistrictLimit": 3,
+      "centerLineDistanceLimit": 0.0,
+      "dC": 1.5,
+      "handoverFixedTime": 15,
+      "handoverVariableTime": 1,
+      "logOpen": 0,
+      "receivingAccessLimit": 20,
+      "receivingDistanceLimit": 100,
+      "shortestPathMode": 0,
+      "speed": 30,
+      "timeSpan": 0.0
+    },
+    "taskCode": "000277",
+    "vehicleType": {
+      "loadableVolume": 11.0,
+      "loadableWeight": 2.5,
+      "vehicleTypeCode": "100001"
+    },
+    "warehouse": {
+      "address": "北京市顺义区顺平路576号",
+      "addressId": 0,
+      "closeTime": "2024-01-02 23:00:59",
+      "latitude": "40.1196490409737",
+      "longitude": "116.60616697651679",
+      "openTime": "2023-12-31 00:00:00"
+    }
+  }
+}

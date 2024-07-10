@@ -13,12 +13,6 @@ class Vehicle:
         self.path = []
         self.total_distance = 0.0
 
-    def get_weight_rate(self):
-        return self.current_weight / self.max_weight
-
-    def get_volume_rate(self):
-        return self.current_volume / self.max_volume
-
     def can_add_order(self, order_weight, order_volume, commute_time: timedelta,
                       earliest_time: datetime, latest_time: datetime):
         proposed_time = self.current_time + commute_time
