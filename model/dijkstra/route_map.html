@@ -25,7 +25,11 @@
             <meta name="viewport" content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
+<<<<<<< HEAD
                 #map_0c821b7314ff69f2cbc84fe8cd011261 {
+=======
+                #map_52546f353d95e6abc492b9a020bc670b {
+>>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
                     position: relative;
                     width: 100.0%;
                     height: 100.0%;
@@ -39,18 +43,31 @@
 <body>
     
     
+<<<<<<< HEAD
             <div class="folium-map" id="map_0c821b7314ff69f2cbc84fe8cd011261" ></div>
+=======
+            <div class="folium-map" id="map_52546f353d95e6abc492b9a020bc670b" ></div>
+>>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
         
 </body>
 <script>
     
     
+<<<<<<< HEAD
             var map_0c821b7314ff69f2cbc84fe8cd011261 = L.map(
                 "map_0c821b7314ff69f2cbc84fe8cd011261",
                 {
                     center: [39.9042, 116.4074],
                     crs: L.CRS.EPSG3857,
                     zoom: 12,
+=======
+            var map_52546f353d95e6abc492b9a020bc670b = L.map(
+                "map_52546f353d95e6abc492b9a020bc670b",
+                {
+                    center: [40.1196490409737, 116.60616697651679],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 10,
+>>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
                     zoomControl: true,
                     preferCanvas: false,
                 }
@@ -60,12 +77,17 @@
 
         
     
+<<<<<<< HEAD
             var tile_layer_a27adaa00cebb947435566b1e9078ad5 = L.tileLayer(
+=======
+            var tile_layer_d9ced3ec9a9ec65c521936b0742c1a71 = L.tileLayer(
+>>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
                 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 {"attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors", "detectRetina": false, "maxNativeZoom": 19, "maxZoom": 19, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
             );
         
     
+<<<<<<< HEAD
             tile_layer_a27adaa00cebb947435566b1e9078ad5.addTo(map_0c821b7314ff69f2cbc84fe8cd011261);
         
     
@@ -85,11 +107,45 @@
         
 
         marker_55c755506c0ddff28fdb87119d3d9dea.bindPopup(popup_61ad5b680b72570bebfac959e136bd04)
+=======
+            tile_layer_d9ced3ec9a9ec65c521936b0742c1a71.addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var poly_line_618947c0cd2a8d5c2d5f35c5c3e1c0fc = L.polyline(
+                [[39.946079, 116.43794], [39.938815, 116.443489], [39.936825, 116.442792], [39.898703, 116.454626], [39.890756, 116.443508]],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "blue", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 5}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var marker_a5a27e8167a97663760982a4fa217593 = L.marker(
+                [39.946079, 116.43794],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_74e7ddf78ee642d1d013286fa7f6f3f8 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_a5a27e8167a97663760982a4fa217593.setIcon(icon_74e7ddf78ee642d1d013286fa7f6f3f8);
+        
+    
+        var popup_5e122330fc0f0421bf6f03c1eff7e228 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_060f96f09d14eb0c41570b15ca96d823 = $(`<div id="html_060f96f09d14eb0c41570b15ca96d823" style="width: 100.0%; height: 100.0%;">北京市东城区东直门南大街1号2层1-1202内P02-20商铺</div>`)[0];
+                popup_5e122330fc0f0421bf6f03c1eff7e228.setContent(html_060f96f09d14eb0c41570b15ca96d823);
+            
+        
+
+        marker_a5a27e8167a97663760982a4fa217593.bindPopup(popup_5e122330fc0f0421bf6f03c1eff7e228)
+>>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
         ;
 
         
     
     
+<<<<<<< HEAD
             var marker_3d35c3157e14ee1acedbf7e10141fd4e = L.marker(
                 [39.9555, 116.3316],
                 {}
@@ -106,11 +162,36 @@
         
 
         marker_3d35c3157e14ee1acedbf7e10141fd4e.bindPopup(popup_b3cbe0167c8b49fd09e881a75916cd92)
+=======
+            var marker_8d58aea4d7ee4194478d4c8bca04ef3f = L.marker(
+                [39.938815, 116.443489],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_dbae4983f5c51f1f4b211b052731ea2f = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_8d58aea4d7ee4194478d4c8bca04ef3f.setIcon(icon_dbae4983f5c51f1f4b211b052731ea2f);
+        
+    
+        var popup_cedccd244635d029d8befd214716e000 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_91026b1cc47bf1c2a4b270d287a866ee = $(`<div id="html_91026b1cc47bf1c2a4b270d287a866ee" style="width: 100.0%; height: 100.0%;">北京市东城区新中街瑞士公寓1、2层L103&L202A</div>`)[0];
+                popup_cedccd244635d029d8befd214716e000.setContent(html_91026b1cc47bf1c2a4b270d287a866ee);
+            
+        
+
+        marker_8d58aea4d7ee4194478d4c8bca04ef3f.bindPopup(popup_cedccd244635d029d8befd214716e000)
+>>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
         ;
 
         
     
     
+<<<<<<< HEAD
             var marker_db751f41f9ca28a6361ae8f9828bde2e = L.marker(
                 [39.9042, 116.4074],
                 {}
@@ -127,11 +208,36 @@
         
 
         marker_db751f41f9ca28a6361ae8f9828bde2e.bindPopup(popup_d059c34713101915d9dd60395f22f25e)
+=======
+            var marker_7baf01e19b016446b501e30cdb34b309 = L.marker(
+                [39.936825, 116.442792],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_e1f3155d372bc333bce4f039c2334e98 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_7baf01e19b016446b501e30cdb34b309.setIcon(icon_e1f3155d372bc333bce4f039c2334e98);
+        
+    
+        var popup_97ce97c0624adb26af805960c2313b0a = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_69313ec38a26cd0a9d6add1caf41f57e = $(`<div id="html_69313ec38a26cd0a9d6add1caf41f57e" style="width: 100.0%; height: 100.0%;">北京市东城区北京市东城区朝阳门北大街8号2号楼1层2-58</div>`)[0];
+                popup_97ce97c0624adb26af805960c2313b0a.setContent(html_69313ec38a26cd0a9d6add1caf41f57e);
+            
+        
+
+        marker_7baf01e19b016446b501e30cdb34b309.bindPopup(popup_97ce97c0624adb26af805960c2313b0a)
+>>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
         ;
 
         
     
     
+<<<<<<< HEAD
             var marker_b683c825d43d23dc313dbd2c20e86381 = L.marker(
                 [39.8506, 116.31],
                 {}
@@ -148,15 +254,329 @@
         
 
         marker_b683c825d43d23dc313dbd2c20e86381.bindPopup(popup_16cad9247103a13555792098969efc04)
+=======
+            var marker_c18232339e626d68fc2bc3d7538a1e5b = L.marker(
+                [39.898703, 116.454626],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_d80fc3aa6d5bfa0fd31a82a712038cf9 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_c18232339e626d68fc2bc3d7538a1e5b.setIcon(icon_d80fc3aa6d5bfa0fd31a82a712038cf9);
+        
+    
+        var popup_9fe3c2000d61c951b3392650f7cd709c = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_5b267bed46651f94a7fae54885ac963f = $(`<div id="html_5b267bed46651f94a7fae54885ac963f" style="width: 100.0%; height: 100.0%;">北京市东城区广渠家园3号楼1层</div>`)[0];
+                popup_9fe3c2000d61c951b3392650f7cd709c.setContent(html_5b267bed46651f94a7fae54885ac963f);
+            
+        
+
+        marker_c18232339e626d68fc2bc3d7538a1e5b.bindPopup(popup_9fe3c2000d61c951b3392650f7cd709c)
+>>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
         ;
 
         
     
     
+<<<<<<< HEAD
             var poly_line_66ad1d1eb1723c92657e9424478c733b = L.polyline(
                 [[39.9042, 116.4074], [39.9555, 116.3316], [39.9042, 116.4074], [39.8506, 116.31]],
                 {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "blue", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 3}
             ).addTo(map_0c821b7314ff69f2cbc84fe8cd011261);
         
+=======
+            var marker_98a5975316dadc3ef3bba15431c21cfe = L.marker(
+                [39.890756, 116.443508],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_80bae13c490bed796b1fb614e8dcf3ea = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_98a5975316dadc3ef3bba15431c21cfe.setIcon(icon_80bae13c490bed796b1fb614e8dcf3ea);
+        
+    
+        var popup_5c48f58149c8767882117bfd5e15290e = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_3a77f0aa72692525c0695d83a1e02320 = $(`<div id="html_3a77f0aa72692525c0695d83a1e02320" style="width: 100.0%; height: 100.0%;">北京市东城区光明路11号天玉大厦1层西侧</div>`)[0];
+                popup_5c48f58149c8767882117bfd5e15290e.setContent(html_3a77f0aa72692525c0695d83a1e02320);
+            
+        
+
+        marker_98a5975316dadc3ef3bba15431c21cfe.bindPopup(popup_5c48f58149c8767882117bfd5e15290e)
+        ;
+
+        
+    
+    
+            var poly_line_e21b7208725a8cd0f8c01bda902d1530 = L.polyline(
+                [[40.104742, 116.419048], [40.104742, 116.419048]],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "green", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 5}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var marker_1434b56557307697990999a521b1efa7 = L.marker(
+                [40.104742, 116.419048],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_6071b1a43cdd5fa0ce4abc9b59f46cc1 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_1434b56557307697990999a521b1efa7.setIcon(icon_6071b1a43cdd5fa0ce4abc9b59f46cc1);
+        
+    
+        var popup_6a8ce53884513afa36f212d0da6c54bd = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_cec703ed155c6f3f008d2acf7cb6a1bd = $(`<div id="html_cec703ed155c6f3f008d2acf7cb6a1bd" style="width: 100.0%; height: 100.0%;">北京市昌平区立汤路186号院1号楼B1层B1041</div>`)[0];
+                popup_6a8ce53884513afa36f212d0da6c54bd.setContent(html_cec703ed155c6f3f008d2acf7cb6a1bd);
+            
+        
+
+        marker_1434b56557307697990999a521b1efa7.bindPopup(popup_6a8ce53884513afa36f212d0da6c54bd)
+        ;
+
+        
+    
+    
+            var marker_f5e028e0e48a43ab7da917d1b7f0ec79 = L.marker(
+                [40.104742, 116.419048],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_c92de7f968a0b5182cfe3599367cc88f = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_f5e028e0e48a43ab7da917d1b7f0ec79.setIcon(icon_c92de7f968a0b5182cfe3599367cc88f);
+        
+    
+        var popup_ae54e91ce661e012ee02b82a0862e101 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_5bdf68544135839ff7e5bb6d934fcc9b = $(`<div id="html_5bdf68544135839ff7e5bb6d934fcc9b" style="width: 100.0%; height: 100.0%;">北京市昌平区立汤路186号院1号楼02层(02)201内208单元</div>`)[0];
+                popup_ae54e91ce661e012ee02b82a0862e101.setContent(html_5bdf68544135839ff7e5bb6d934fcc9b);
+            
+        
+
+        marker_f5e028e0e48a43ab7da917d1b7f0ec79.bindPopup(popup_ae54e91ce661e012ee02b82a0862e101)
+        ;
+
+        
+    
+    
+            var poly_line_2cd8352da525017ce0452073882fe41c = L.polyline(
+                [[39.811108, 116.449658], [39.73531, 116.349419], [39.770126, 116.340761], [39.795298, 116.33387]],
+                {"bubblingMouseEvents": true, "color": "purple", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "purple", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 5}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var marker_318894434f5b3147fc805e0cfe90b2ee = L.marker(
+                [39.811108, 116.449658],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_ca87d07b7f4c41956d1eee1fc9097ded = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_318894434f5b3147fc805e0cfe90b2ee.setIcon(icon_ca87d07b7f4c41956d1eee1fc9097ded);
+        
+    
+        var popup_79e83c8de843c4f870217194e514f086 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_cd0a2d796d729ff0b20e48b13877bbea = $(`<div id="html_cd0a2d796d729ff0b20e48b13877bbea" style="width: 100.0%; height: 100.0%;">北京市大兴区旧宫镇旧宫西路3号(物美超市左侧)</div>`)[0];
+                popup_79e83c8de843c4f870217194e514f086.setContent(html_cd0a2d796d729ff0b20e48b13877bbea);
+            
+        
+
+        marker_318894434f5b3147fc805e0cfe90b2ee.bindPopup(popup_79e83c8de843c4f870217194e514f086)
+        ;
+
+        
+    
+    
+            var marker_334a05fae16360250f9bcbd2d7aa7768 = L.marker(
+                [39.73531, 116.349419],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_e46ae3d4f1fdcecfaac2e524116c93bf = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_334a05fae16360250f9bcbd2d7aa7768.setIcon(icon_e46ae3d4f1fdcecfaac2e524116c93bf);
+        
+    
+        var popup_0c2437dc26f0fc688df98efbe0a163b2 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_bbb296d2289a48e88540d3e0bffc253b = $(`<div id="html_bbb296d2289a48e88540d3e0bffc253b" style="width: 100.0%; height: 100.0%;">北京市大兴区黄村东大街38号院2号楼1层（01）内1F-11</div>`)[0];
+                popup_0c2437dc26f0fc688df98efbe0a163b2.setContent(html_bbb296d2289a48e88540d3e0bffc253b);
+            
+        
+
+        marker_334a05fae16360250f9bcbd2d7aa7768.bindPopup(popup_0c2437dc26f0fc688df98efbe0a163b2)
+        ;
+
+        
+    
+    
+            var marker_92dc095b437c08909816a2887c20896a = L.marker(
+                [39.770126, 116.340761],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_b566a97b509fed3d9905b181267890d2 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_92dc095b437c08909816a2887c20896a.setIcon(icon_b566a97b509fed3d9905b181267890d2);
+        
+    
+        var popup_05d8b3c5425e0b8e0cae784ac1023acb = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_a4288e6dc1d9bebc90702ab87a5f833a = $(`<div id="html_a4288e6dc1d9bebc90702ab87a5f833a" style="width: 100.0%; height: 100.0%;">北京市大兴区金星西路3号</div>`)[0];
+                popup_05d8b3c5425e0b8e0cae784ac1023acb.setContent(html_a4288e6dc1d9bebc90702ab87a5f833a);
+            
+        
+
+        marker_92dc095b437c08909816a2887c20896a.bindPopup(popup_05d8b3c5425e0b8e0cae784ac1023acb)
+        ;
+
+        
+    
+    
+            var marker_df53a3504382f9adafb1f75984025022 = L.marker(
+                [39.795298, 116.33387],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_5364b1ad40a54f5782c1bf067449aefb = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_df53a3504382f9adafb1f75984025022.setIcon(icon_5364b1ad40a54f5782c1bf067449aefb);
+        
+    
+        var popup_d5fb94af8b9269eaf20bfe5b4e7975f4 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_bf171cedcf2644df5676462bcb444952 = $(`<div id="html_bf171cedcf2644df5676462bcb444952" style="width: 100.0%; height: 100.0%;">北京市大兴区西红门镇欣宁大街15号1层1-01-28-R号</div>`)[0];
+                popup_d5fb94af8b9269eaf20bfe5b4e7975f4.setContent(html_bf171cedcf2644df5676462bcb444952);
+            
+        
+
+        marker_df53a3504382f9adafb1f75984025022.bindPopup(popup_d5fb94af8b9269eaf20bfe5b4e7975f4)
+        ;
+
+        
+    
+    
+            var poly_line_9a616b84bbb14d61f9db5ff569bd90aa = L.polyline(
+                [[40.361323, 116.841688], [40.662436, 117.251497], [40.380933, 116.852228]],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "orange", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 5}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var marker_bd9c71a06910e0b6a24d1619a9cbd173 = L.marker(
+                [40.361323, 116.841688],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_78c0b78896d2e08f3f47e2862e5752a2 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_bd9c71a06910e0b6a24d1619a9cbd173.setIcon(icon_78c0b78896d2e08f3f47e2862e5752a2);
+        
+    
+        var popup_f0e047ea38dc9e290798cc07381c4b00 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_6e5ff489c702ac2cd19c9458b51d5cb7 = $(`<div id="html_6e5ff489c702ac2cd19c9458b51d5cb7" style="width: 100.0%; height: 100.0%;">北京市密云区滨河路178号万象汇一层</div>`)[0];
+                popup_f0e047ea38dc9e290798cc07381c4b00.setContent(html_6e5ff489c702ac2cd19c9458b51d5cb7);
+            
+        
+
+        marker_bd9c71a06910e0b6a24d1619a9cbd173.bindPopup(popup_f0e047ea38dc9e290798cc07381c4b00)
+        ;
+
+        
+    
+    
+            var marker_9061851ceaab21447b256055ccdcc81c = L.marker(
+                [40.662436, 117.251497],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_45a90d1f835c39d6b2952cd2fb56d746 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_9061851ceaab21447b256055ccdcc81c.setIcon(icon_45a90d1f835c39d6b2952cd2fb56d746);
+        
+    
+        var popup_66f7a9097fdb405ecabc09984f5a5915 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_6e447a4993a9f35bb6c0c2757d6cf0b7 = $(`<div id="html_6e447a4993a9f35bb6c0c2757d6cf0b7" style="width: 100.0%; height: 100.0%;">北京市密云县古北口镇司马台村国际休闲旅游度假区第一层101单元</div>`)[0];
+                popup_66f7a9097fdb405ecabc09984f5a5915.setContent(html_6e447a4993a9f35bb6c0c2757d6cf0b7);
+            
+        
+
+        marker_9061851ceaab21447b256055ccdcc81c.bindPopup(popup_66f7a9097fdb405ecabc09984f5a5915)
+        ;
+
+        
+    
+    
+            var marker_74e4fef7b45e4bfc3ab9517fa8772cfa = L.marker(
+                [40.380933, 116.852228],
+                {}
+            ).addTo(map_52546f353d95e6abc492b9a020bc670b);
+        
+    
+            var icon_66c375d7e25fbb89b3d5c9e9b3299839 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_74e4fef7b45e4bfc3ab9517fa8772cfa.setIcon(icon_66c375d7e25fbb89b3d5c9e9b3299839);
+        
+    
+        var popup_ce2b410ce6a7ec8c9757ffb6bfc16495 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_a8d6e2816b1cf0c584c37cf80e0a6be6 = $(`<div id="html_a8d6e2816b1cf0c584c37cf80e0a6be6" style="width: 100.0%; height: 100.0%;">北京市密云区密云镇鼓楼南大街1号1层的1129-F1A005、1129-F1-A004、1129-F1-B008店铺</div>`)[0];
+                popup_ce2b410ce6a7ec8c9757ffb6bfc16495.setContent(html_a8d6e2816b1cf0c584c37cf80e0a6be6);
+            
+        
+
+        marker_74e4fef7b45e4bfc3ab9517fa8772cfa.bindPopup(popup_ce2b410ce6a7ec8c9757ffb6bfc16495)
+        ;
+
+        
+    
+>>>>>>> 27bacb937e06da47f06a6799f48d8bf2b665cd11
 </script>
 </html>
