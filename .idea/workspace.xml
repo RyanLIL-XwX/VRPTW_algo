@@ -4,33 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bf35505e-f153-44fa-bec3-80f0f7ea845d" name="Changes" comment="加了visualize的工具，在地图上visualize路线">
-      <change afterPath="$PROJECT_DIR$/model/dijkstra -v2/Data_loader.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/dijkstra -v2/Order.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/dijkstra -v2/VRPTW.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/dijkstra -v2/Vehicle.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/dijkstra -v2/cluster_test.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/dijkstra -v2/d_v2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/dijkstra -v2/loader_test.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/dijkstra -v2/runner.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/dijkstra -v2/sample.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/dijkstra -v2/small_sample.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/dijkstra -v2/visualize.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/dijkstra -v2/北京712单.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/dijkstra/extra_small.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/greedy/cluster_test.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/greedy/intersecting.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/greedy/runner_api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/dijkstra/VRPTW.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/dijkstra/VRPTW.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/greedy/Data_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/Data_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/greedy/Greedy.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/Greedy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/greedy/Order.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/Order.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/greedy/Vehicle.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/Vehicle.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/greedy/output/712.html" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/output/712.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/greedy/output/sample.html" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/output/sample.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/greedy/runner.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/runner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/greedy/visualize.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/visualize.py" afterDir="false" />
-    </list>
+    <list default="true" id="bf35505e-f153-44fa-bec3-80f0f7ea845d" name="Changes" comment="加了visualize的工具，在地图上visualize路线" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -265,7 +239,7 @@
       <workItem from="1719901899219" duration="48000" />
       <workItem from="1719901947980" duration="1398000" />
       <workItem from="1719903710274" duration="25113000" />
-      <workItem from="1720268613060" duration="7806000" />
+      <workItem from="1720268613060" duration="8178000" />
     </task>
     <task id="LOCAL-00001" summary="加了visualize的工具，在地图上visualize路线">
       <created>1719298876888</created>
