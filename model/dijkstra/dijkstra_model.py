@@ -47,8 +47,11 @@ def dijkstra(distance_store, start_address):
                 distances[neighbor] = distance
                 predecessors[neighbor] = current_node
                 priority_queue[neighbor] = distance
-
-    return visited_order
+    distances = sorted(distances.items(), key=lambda x: x[1])
+    shortest_path = list() # 记录最短路径
+    for i in distances:
+        shortest_path.append(i[0])
+    return shortest_path
 
 # 示例 distance_store 数据
 distance_store = {
