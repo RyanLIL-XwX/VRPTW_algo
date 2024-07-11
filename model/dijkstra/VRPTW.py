@@ -507,37 +507,44 @@ class VRPTW_model(object):
             check_volume = 0.0 # 用于检查车载空间是否可行
             arrive_time = self.get_receive_earliest_time(order_path[1][0]) # 到达当前订单的时间(分钟)
             leave_time = "" # 离开当前订单的时间(分钟)
+            current_pointer = 0 # 访问当前订单的指针
             pointer = 0 # 如果当前订单不可行, 用来检查下一个可行订单
             temp_list = list() # 用于储存可以符合要求的订单地址
-            for j in range(len(order_path)):
-                if (order_path[j] in visited_address):
+            while current_pointer < len(order_path):
+                if (order_path[current_pointer] in visited_address):
+                    current_pointer += 1
                     continue
-                address, distance = order_path[j]
+                address, distance = order_path[current_pointer]
                 check_weight += self.calculate_weight(address) # 计算车载重量
                 check_volume += self.calculate_volume(address) # 计算车载空间
                 leave_time = self.calculate_leave_time(self.calculate_stay_period(check_weight), arrive_time) # 离开当前订单的时间(分钟)
-                # 每次新的一辆车的第一个订单，都需要重新更新出发时间
+                # 每次新的一辆车的第一个订单, 都需要重新更新出发时间
                 if (len(temp_list) == 0):
                     arrive_time = self.get_receive_earliest_time(address) # 到达当前订单的时间(分钟)
                 else:
                     arrive_time = self.calculate_arrive_time(leave_time, distance / car_speed) # 到达当前订单的时间(分钟)
+                # 如果车载重量和车载空间可行, 并且时间可行, 则将当前的订单地址加入到temp_list中
                 if (self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True):
                     if (self.time_availble(self.get_receive_earliest_time(address), self.get_receive_latest_time(address), arrive_time) == True):
                         temp_list.append((address, distance))
                         visited_address.add((address, distance))
+                        current_pointer += 1
+                    # 当时间不可行时, 将会访问后面的所有可能满足要求的订单地址, 并且加入到temp_list中
                     else:
-                        pointer = j + 1
+                        pointer = current_pointer + 1
                         while (pointer < len(order_path)):
-                            check_weight += self.calculate_weight(order_path[j][0]) # 计算车载重量
-                            check_volume += self.calculate_volume(order_path[j][0]) # 计算车载空间
+                            check_weight += self.calculate_weight(order_path[pointer][0]) # 计算车载重量
+                            check_volume += self.calculate_volume(order_path[pointer][0]) # 计算车载空间
                             leave_time = self.calculate_leave_time(self.calculate_stay_period(check_weight), arrive_time) # 离开当前订单的时间(分钟)
                             arrive_time = self.calculate_arrive_time(leave_time, order_path[pointer][1] / car_speed) # 到达当前订单的时间(分钟
                             if (self.weight_availble(check_weight) == True and self.volume_availble(check_volume) == True and self.time_availble(self.get_receive_earliest_time(order_path[pointer][0]), self.get_receive_latest_time(order_path[pointer][0]), arrive_time) == True):
                                 temp_list.append(order_path[pointer])
                                 visited_address.add(order_path[pointer])
                             pointer += 1
+                # 如果车载重量或者车载空间不可行, 则将当前的订单地址加入到final_path中, 并且清空temp_list
                 else:
-                    final_path.append(temp_list)
+                    if (len(temp_list) != 0):
+                        final_path.append(temp_list[:]) # 这里需要使用temp_list[:]来进行深拷贝, 否则temp_list中的元素被清空时, final_path中的元素也会被清空
                     check_weight = 0.0
                     check_volume = 0.0
                     temp_list.clear()     
@@ -561,6 +568,7 @@ class VRPTW_model(object):
         max_weight = self.vehicle_type["loadableWeight"] # 车辆的最大载重量
         max_volume = self.vehicle_type["loadableVolume"] # 车辆的最大载重量
         order = 0 # 用于记录订单的数量
+        # 计算车载重量和车载空间的利用率
         for i in processed_final_path:
             for j in i:
                 weight_record += self.calculate_weight(j)
@@ -570,6 +578,7 @@ class VRPTW_model(object):
             volume_utilization.append((volume_record / max_volume) * 100)
             weight_record = 0.0
             volume_record = 0.0
+        # 打印车载重量和车载空间的利用率和订单的数量
         print("Total orders count: {}\n".format(order))
         if (len(weight_utilization) == len(volume_utilization)):
             length = len(weight_utilization)
@@ -580,9 +589,21 @@ class VRPTW_model(object):
             print()
         else:
             raise ValueError("The length of weight utilization and volume utilization is not equal.")
-        
+        # 计算车载重量和车载空间的平均利用率
+        average_weight_utilization = round(sum(weight_utilization) / len(weight_utilization))
+        average_volume_utilization = round(sum(volume_utilization) / len(volume_utilization))
+        print("The average weight utilization is {:.2f}% and the average volume utilization is {:.2f}%\n".format(average_weight_utilization, average_volume_utilization))
+        # 计算总距离
+        warehouse_info = self.warehouse["address"]
         total_distance = 0
-        print("Total distance for the {}: [{:.2f}km] and Total number of cars using: [{}]".format(file_name, total_distance, len(processed_final_path)))
+        for i in final_path:
+            for j in range(len(i)):
+                if (j == 0):
+                    if ((warehouse_info, i[j][0]) in self.distance_store_update.keys()):
+                        total_distance += self.distance_store_update[(warehouse_info, i[j][0])]
+                else:
+                    total_distance += i[j][1]
+        print("Total distance for the {}: {:.2f}km and Total number of cars using: [{}]".format(file_name, total_distance, len(processed_final_path)))
 
     def plot_route_on_map(self, location_collect, shortest_path):
         # 创建一个folium地图对象, 初始位置设为仓库的位置
@@ -665,8 +686,9 @@ if __name__ == "__main__":
         # print(dijkstra_path)
         processed_final_path, final_path = order_data.process_dijkstra_path(dijkstra_path)
         # print(processed_final_path)
-        # 打印车载重量和车载空间的利用率
+        # 打印订单数量, 车载重量, 车载空间的利用率和总距离
         order_data.calculate_info(processed_final_path, final_path, file)
+        # 将路径绘制到地图上
         order_data.plot_route_on_map(location_collect, processed_final_path)
 
     start_find_path()
