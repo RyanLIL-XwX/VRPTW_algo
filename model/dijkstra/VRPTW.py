@@ -605,6 +605,7 @@ class VRPTW_model(object):
                     total_distance += i[j][1]
         print("Total distance for the {}: {:.2f}km and Total number of cars using: [{}]".format(file_name, total_distance, len(processed_final_path)))
 
+    # 将路径绘制到地图上
     def plot_route_on_map(self, location_collect, shortest_path):
         # 创建一个folium地图对象, 初始位置设为仓库的位置
         map_center = [location_collect[0][1], location_collect[0][2]]
