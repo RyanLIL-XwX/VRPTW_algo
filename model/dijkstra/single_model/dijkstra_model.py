@@ -22,9 +22,6 @@ def dijkstra(distance_store, start_address):
     distances = {node: float('inf') for node in graph}
     distances[start_address] = 0  # 起点的距离为 0
     
-    # 初始化前驱字典，用于重建最短路径
-    predecessors = {node: None for node in graph}
-    
     # 创建一个优先队列，并将起点加入其中
     priority_queue = heapdict.heapdict()
     priority_queue[start_address] = 0
@@ -45,7 +42,6 @@ def dijkstra(distance_store, start_address):
             # 如果找到更短的路径，则更新距离和前驱节点
             if distance < distances[neighbor]:
                 distances[neighbor] = distance
-                predecessors[neighbor] = current_node
                 priority_queue[neighbor] = distance
     distances = sorted(distances.items(), key=lambda x: x[1])
     shortest_path = list() # 记录最短路径
