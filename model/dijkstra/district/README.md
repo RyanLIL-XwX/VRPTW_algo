@@ -57,6 +57,7 @@ This report summarizes the weight and volume utilization for a fleet of cars, al
 
 - **Total Distance for `beijing712.txt`:** 8018.72 km
 - **Total Number of Cars Used:** 37
+- **Classification mode:** Classify data by district
 
 ## Image
 
