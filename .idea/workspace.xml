@@ -4,7 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bf35505e-f153-44fa-bec3-80f0f7ea845d" name="Changes" comment="加了visualize的工具，在地图上visualize路线" />
+    <list default="true" id="bf35505e-f153-44fa-bec3-80f0f7ea845d" name="Changes" comment="加了visualize的工具，在地图上visualize路线">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/greedy/Greedy.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/Greedy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/greedy/intersecting.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/intersecting.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/greedy/map.html" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/map.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/greedy/output/sample.html" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/output/sample.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/greedy/output/北京712单.html" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/output/北京712单.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/greedy/runner.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/runner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/greedy/runner_api_1.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/greedy/runner_api_1.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -17,37 +26,51 @@
       </list>
     </option>
   </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
+    </option>
+  </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/model/dijkstra/test.py" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="ProjectErrors" />
+  </component>
   <component name="ProjectId" id="2iLxEtB0QQXxwySS4Lx76vJVnuM" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;deletionFromPopupRequiresConfirmation&quot;: &quot;false&quot;,
-    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;11&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/shenhanxu/Desktop/凯捷实习/VRPTW_algo/model&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.new.ui&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "deletionFromPopupRequiresConfirmation": "false",
+    "jdk.selected.JAVA_MODULE": "11",
+    "last_opened_file_path": "/Users/shenhanxu/Desktop/凯捷实习/VRPTW_algo/model",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "project.propDebugger",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/model" />
@@ -175,9 +198,10 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
+      <option name="SDK_NAME" value="Python 3.9 (VRPTW_algo)" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/model/greedy" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
@@ -239,7 +263,8 @@
       <workItem from="1719901899219" duration="48000" />
       <workItem from="1719901947980" duration="1398000" />
       <workItem from="1719903710274" duration="25113000" />
-      <workItem from="1720268613060" duration="8178000" />
+      <workItem from="1720268613060" duration="25220000" />
+      <workItem from="1720761272162" duration="6969000" />
     </task>
     <task id="LOCAL-00001" summary="加了visualize的工具，在地图上visualize路线">
       <created>1719298876888</created>
@@ -276,9 +301,9 @@
           <line>29</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/model/greedy/runner.py</url>
-          <line>23</line>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file:///var/folders/s5/f4l6b9f12bj26cvn8gqqy5rw0000gn/T/leetcode/editor/en/[72]Edit Distance.java</url>
+          <line>52</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
@@ -291,7 +316,7 @@
     <SUITE FILE_PATH="coverage/VRPTW_algo$visualize.coverage" NAME="visualize Coverage Results" MODIFIED="1719909461998" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model/dijkstra" />
     <SUITE FILE_PATH="coverage/VRPTW_algo$runner__1_.coverage" NAME="runner (1) Coverage Results" MODIFIED="1720163908121" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model/dijkstra -v2" />
     <SUITE FILE_PATH="coverage/VRPTW_algo$.coverage" NAME=" Coverage Results" MODIFIED="1719551799541" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model" />
-    <SUITE FILE_PATH="coverage/VRPTW_algo$runner.coverage" NAME="runner Coverage Results" MODIFIED="1720590584557" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model/greedy" />
+    <SUITE FILE_PATH="coverage/VRPTW_algo$runner.coverage" NAME="runner Coverage Results" MODIFIED="1720764702746" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model/greedy" />
     <SUITE FILE_PATH="coverage/VRPTW_algo$newV.coverage" NAME="newV Coverage Results" MODIFIED="1719915690472" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model/dijkstra" />
     <SUITE FILE_PATH="coverage/VRPTW_algo$VRPTW.coverage" NAME="VRPTW Coverage Results" MODIFIED="1719295661033" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/model" />
   </component>

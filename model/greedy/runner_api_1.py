@@ -7,6 +7,7 @@ import json
 
 app = Flask(__name__)
 
+
 def print_vehicle_paths(vehicles):
     total_orders_in_vehicles = 0
     vehicle_paths = []
@@ -28,16 +29,17 @@ def print_vehicle_paths(vehicles):
 
     return total_orders_in_vehicles, vehicle_paths
 
+
 @app.route('/run-greedy', methods=['POST'])
 def run_greedy():
     try:
         data = request.get_json()  # 直接获取JSON数据
         if not data:
             return jsonify({"error": "No JSON data"}), 400
-        
+
         # 打印接收到的数据
         print("Received JSON data:", data)
-        
+
         orders, header = load_data_from_dict(data)  # 使用新的函数处理数据
         total_distance = 0.0
 
@@ -75,6 +77,7 @@ def run_greedy():
         # 打印异常以帮助调试
         print("Exception occurred:", str(e))
         return jsonify({"error": str(e)}), 400
+
 
 if __name__ == "__main__":
     app.run(debug=True)

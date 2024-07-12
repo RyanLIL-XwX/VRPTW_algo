@@ -8,7 +8,6 @@ from Vehicle import Vehicle
 from Data_loader import group_orders_by_cluster, classify_orders_by_district
 
 
-
 def calculate_time(current_time: str, minutes: int, mode: str) -> str:
     if not current_time:
         raise ValueError("The input time is empty. Please provide a valid time string.")
@@ -110,7 +109,7 @@ def greedy_algorithm(orders: List[Order], header: dict):
     labels = cluster_orders_hierarchical(orders, 0.5)
     clusters = group_orders_by_cluster(orders, labels)
 
-    list_of_list = classify_orders_by_district(orders)
+    # list_of_list = classify_orders_by_district(orders)
 
     for district, orders in clusters.items():
         if not orders:

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="LeetcodeEditorPro">
+    <option name="projectConfig">
+      <map>
+        <entry key="/var/folders/s5/f4l6b9f12bj26cvn8gqqy5rw0000gn/T/leetcode/editor/en/[2]Add Two Numbers.java">
+          <value>
+            <LeetcodeEditor>
+              <option name="contentPath" value="/var/folders/s5/f4l6b9f12bj26cvn8gqqy5rw0000gn/T/leetcode/editor/en/doc/content/[2]Add Two Numbers.md" />
+              <option name="frontendQuestionId" value="leetcode.com2" />
+              <option name="host" value="leetcode.com" />
+              <option name="langSlug" value="java" />
+              <option name="path" value="/var/folders/s5/f4l6b9f12bj26cvn8gqqy5rw0000gn/T/leetcode/editor/en/[2]Add Two Numbers.java" />
+              <option name="titleSlug" value="add-two-numbers" />
+            </LeetcodeEditor>
+          </value>
+        </entry>
+        <entry key="/var/folders/s5/f4l6b9f12bj26cvn8gqqy5rw0000gn/T/leetcode/editor/en/[72]Edit Distance.java">
+          <value>
+            <LeetcodeEditor>
+              <option name="contentPath" value="/var/folders/s5/f4l6b9f12bj26cvn8gqqy5rw0000gn/T/leetcode/editor/en/doc/content/[72]Edit Distance.md" />
+              <option name="frontendQuestionId" value="leetcode.com72" />
+              <option name="host" value="leetcode.com" />
+              <option name="langSlug" value="java" />
+              <option name="path" value="/var/folders/s5/f4l6b9f12bj26cvn8gqqy5rw0000gn/T/leetcode/editor/en/[72]Edit Distance.java" />
+              <option name="titleSlug" value="edit-distance" />
+            </LeetcodeEditor>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
