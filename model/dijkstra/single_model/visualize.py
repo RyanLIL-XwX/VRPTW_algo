@@ -3,17 +3,24 @@ import folium
 def plot_route_on_map(location_collect, shortest_path):
     # 创建一个folium地图对象, 初始位置设为仓库的位置
     map_center = [location_collect[0][1], location_collect[0][2]]
-    route_map = folium.Map(location=map_center, zoom_start=10)
+    route_map = folium.Map(location=map_center, zoom_start=10, tiles=None)
+
+    # 添加黑色背景
+    folium.TileLayer(
+        tiles='https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+        attr='Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.',
+        name='Dark Background',
+        control=False,
+        overlay=True
+    ).add_to(route_map)
     
     # 创建一个字典, 方便通过地址快速查找经纬度和区域
     location_dict = {loc[0]: loc[1:] for loc in location_collect}
-    # print(location_dict)  # 调试输出
     
     # 为每条路径创建一个不同颜色的线条
-    colors = ["blue", "green", "purple", "orange", "darkred", "lightred", "beige", "darkblue", "darkgreen", "cadetblue", "darkpurple", "white", "pink", "lightblue", "lightgreen", "gray", "black"]
+    colors = ["blue", "green", "purple", "orange", "darkred", "lightred", "darkblue", "darkgreen", "cadetblue", "darkpurple", "pink", "lightblue", "lightgreen"]
     
     # 遍历shortest_path中的每个子列表
-    # enumerate函数用于在遍历列表时, 同时获得元素的索引和值.
     for index, path in enumerate(shortest_path):
         # 存储路径的经纬度
         route_coords = []
@@ -23,9 +30,6 @@ def plot_route_on_map(location_collect, shortest_path):
             if address in location_dict:
                 latitude, longitude, district = location_dict[address]
                 route_coords.append([latitude, longitude])
-            #     print(f"Address: {address}, Lat: {latitude}, Lon: {longitude}, District: {district}")  # 调试输出
-            # else:
-            #     print(f"Address not found: {address}")  # 调试输出
         
         # 绘制路径
         if route_coords:
@@ -41,11 +45,11 @@ def plot_route_on_map(location_collect, shortest_path):
                     fill=True,
                     fill_color=colors[index % len(colors)],
                     fill_opacity=0.8,
-                    popup=address
+                    popup=folium.Popup(f'<div style="white-space: nowrap;">{address}</div>', max_width=300)
                 ).add_to(route_map)
-    
+        
     # 保存地图到文件
-    route_map.save("route_map_test.html")
+    route_map.save("route_map.html")
 
 # 示例数据
 location_collect = [["北京市顺义区顺平路576号", 40.1196490409737, 116.60616697651679, "仓库"], 

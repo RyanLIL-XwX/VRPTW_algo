@@ -1,4 +1,4 @@
-from VRPTW import VRPTW_model
+from dijkstra_VRPTW_district import VRPTW_model
 
 if __name__ == "__main__":
     # 创建一个VRPTW_model对象, 并将file作为参数传入
