@@ -59,6 +59,9 @@ if __name__ == "__main__":
         distance_store_dongcheng = order_data.calculate_distance(location_collect_dongcheng)
         # print(distance_store_dongcheng)
         
+        # 测试对所有订单信息通过knn算法进行分类
+        # 函数: knn_classification()
+        
         # 测试对于仓库出发信息的收集
         # 函数: warehouse_leave_info()
         distance_store_update = order_data.warehouse_leave_info(distance_store)
@@ -190,7 +193,7 @@ if __name__ == "__main__":
             pass
         else:
             print("(1) get_distance_warehouse_order() failed.")
-
+            
     # run test cases
     def runtest():
         testbasic() # all pass

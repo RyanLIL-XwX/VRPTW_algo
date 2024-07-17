@@ -5,6 +5,8 @@ from haversine import haversine, Unit # 用来计算两个经纬度之间的距�
 from datetime import datetime, timedelta # 用来计算时间
 import heapdict # dijkstra算法中使用的数据结构, 一种优先队列
 import folium # 用于绘制地图
+import numpy as np
+from sklearn.cluster import KMeans
 
 class VRPTW_model(object):
     def __init__(self, file_path):
@@ -38,24 +40,8 @@ class VRPTW_model(object):
         self.set_receive_earliest_time = None # 设置最早收货时间
         self.set_receive_latest_time = None # 设置最晚收货时间
         
-        # 给信息划分并分别处理, 全部都是和self.location_collect一样结构的数据
-        self.dongcheng = [] # 储存东城区的地址信息
-        self.xicheng = [] # 储存西城区的地址信息
-        self.chaoyang = [] # 储存朝阳区的地址信息
-        self.fengtai = [] # 储存丰台区的地址信息
-        self.shijingshan = [] # 储存石景山区的地址信息
-        self.haidian = [] # 储存海淀区的地址信息
-        self.mentougou = [] # 储存门头沟区的地址信息
-        self.fangshan = [] # 储存房山区的地址信息
-        self.tongzhou = [] # 储存通州区的地址信息
-        self.shunyi = [] # 储存顺义区的地址信息
-        self.changping = [] # 储存昌平区的地址信息
-        self.daxing = [] # 储存大兴区的地址信息
-        self.huairou = [] # 储存怀柔区的地址信息
-        self.pinggu = [] # 储存平谷区的地址信息
-        self.miyun = [] # 储存密云区的地址信息
-        self.yanqing = [] # 储存延庆区的地址信息
-        self.location_collect_split_district = [] # 储存划分后的地址信息
+        # 给信息划分并分别处理, 全部都是和self.location_collect一样的结构
+        self.location_collect_split_kmeans = [] # 储存K-means分类器的地址信息
     
     # 函数用于读取txt文件中json格式的数据
     def load_data(self):
@@ -346,67 +332,40 @@ class VRPTW_model(object):
             return True
         else:
             return False
-        
-    # 得到仓库和该订单之间的距离, helper function
-    def get_distance_warehouse_order(self, order_address):
-        for i in self.distance_store_update.keys():
-            if (i[1] == order_address):
-                return self.distance_store_update[i]
-            
-    # --------------------------------------------------------- #
     
-    # 划分location_collect中的信息, 通过区的名称分别加入不同的容器中
-    def location_collect_split(self, location_collect):
-        for i in range(len(location_collect)):
-            if (location_collect[i][3] == "东城区" or location_collect[i][3] == "仓库"):
-                self.dongcheng.append(location_collect[i])
-            if (location_collect[i][3] == "西城区" or location_collect[i][3] == "仓库"):
-                self.xicheng.append(location_collect[i])
-            if (location_collect[i][3] == "朝阳区" or location_collect[i][3] == "仓库"):
-                self.chaoyang.append(location_collect[i])
-            if (location_collect[i][3] == "丰台区" or location_collect[i][3] == "仓库"):
-                self.fengtai.append(location_collect[i])
-            if (location_collect[i][3] == "石景山区" or location_collect[i][3] == "仓库"):
-                self.shijingshan.append(location_collect[i])
-            if (location_collect[i][3] == "海淀区" or location_collect[i][3] == "仓库"):
-                self.haidian.append(location_collect[i])
-            if (location_collect[i][3] == "门头沟区" or location_collect[i][3] == "仓库"):
-                self.mentougou.append(location_collect[i])
-            if (location_collect[i][3] == "房山区" or location_collect[i][3] == "仓库"):
-                self.fangshan.append(location_collect[i])
-            if (location_collect[i][3] == "通州区" or location_collect[i][3] == "仓库"):
-                self.tongzhou.append(location_collect[i])
-            if (location_collect[i][3] == "顺义区" or location_collect[i][3] == "仓库"):
-                self.shunyi.append(location_collect[i])
-            if (location_collect[i][3] == "昌平区" or location_collect[i][3] == "仓库"):
-                self.changping.append(location_collect[i])
-            if (location_collect[i][3] == "大兴区" or location_collect[i][3] == "仓库"):
-                self.daxing.append(location_collect[i])
-            if (location_collect[i][3] == "怀柔区" or location_collect[i][3] == "仓库"):
-                self.huairou.append(location_collect[i])
-            if (location_collect[i][3] == "平谷区" or location_collect[i][3] == "仓库"):
-                self.pinggu.append(location_collect[i])
-            if (location_collect[i][3] == "密云区" or location_collect[i][3] == "仓库"):
-                self.miyun.append(location_collect[i])
-            if (location_collect[i][3] == "延庆区" or location_collect[i][3] == "仓库"):
-                self.yanqing.append(location_collect[i])
-        self.location_collect_split_district.append(self.dongcheng)
-        self.location_collect_split_district.append(self.xicheng)
-        self.location_collect_split_district.append(self.chaoyang)
-        self.location_collect_split_district.append(self.fengtai)
-        self.location_collect_split_district.append(self.shijingshan)
-        self.location_collect_split_district.append(self.haidian)
-        self.location_collect_split_district.append(self.mentougou)
-        self.location_collect_split_district.append(self.fangshan)
-        self.location_collect_split_district.append(self.tongzhou)
-        self.location_collect_split_district.append(self.shunyi)
-        self.location_collect_split_district.append(self.changping)
-        self.location_collect_split_district.append(self.daxing)
-        self.location_collect_split_district.append(self.huairou)
-        self.location_collect_split_district.append(self.pinggu)
-        self.location_collect_split_district.append(self.miyun)
-        self.location_collect_split_district.append(self.yanqing)
-        return self.dongcheng, self.xicheng, self.chaoyang, self.fengtai, self.shijingshan, self.haidian, self.mentougou, self.fangshan, self.tongzhou, self.shunyi, self.changping, self.daxing, self.huairou, self.pinggu, self.miyun, self.yanqing
+    # --------------------------------------------------------- #
+
+    # 通过K-means来划分location_collect中的信息
+    def cluster_locations_kmeans(self, location_collect, n_clusters=5, n_init=10):
+        """
+        对地址进行K-means聚类
+
+        参数:
+        location_collect: 地址的列表, 每个地址包含名称、纬度、经度和描述信息
+        n_clusters: 聚类的簇数量
+        n_init: K-means算法的初始运行次数
+
+        返回:
+        clustered_location_collect: 聚类后的地址列表
+        """
+        warehouse_info = [self.warehouse["address"], float(self.warehouse["latitude"]), float(self.warehouse["longitude"]), "仓库"] # 仓库的地址
+        print(warehouse_info)
+        # 提取所有地址的纬度和经度, 并将其存储在coords数组中. loc[1]是纬度, loc[2]是经度
+        coords = np.array([[loc[1], loc[2]] for loc in location_collect], dtype=float)
+
+        # 使用K-means进行聚类
+        kmeans = KMeans(n_clusters=n_clusters, n_init=n_init, random_state=0).fit(coords)
+        labels = kmeans.labels_
+
+        # 将地址按簇分类
+        clustered_location_collect = [[warehouse_info] for _ in range(n_clusters)]
+        for label, loc in zip(labels, location_collect):
+            clustered_location_collect[label].append(loc)
+
+        self.location_collect_split_kmeans = clustered_location_collect # 更新self.location_collect_split_kmeans属性
+        return self.location_collect_split_kmeans
+    
+    # --------------------------------------------------------- #
     
     # main part: finding path algorithm
     
@@ -481,17 +440,18 @@ class VRPTW_model(object):
             if (i[0] == self.warehouse["address"]):
                 del distance_store_copy[i]
         # 开始进行dijkstra算法, 用于计算最短路径
-        # dijkstra_path += self.dijkstra(distance_store_copy, first_order_address)
         dijkstra_path = self.dijkstra(distance_store_copy, first_order_address)
         return dijkstra_path
                
-    # 运行find_path()函数, 每次调用一个区的数据去进行最短路径的查找
+    # 运行find_path()函数, 每次调用一个cluster的数据去进行最短路径的查找
     def run_find_path(self):
         all_path = list() # 用于储存所有的最短路径
-        for i in range(len(self.location_collect_split_district)):
-            # length为1说明没有别的任何地址, 只储存了最基础的仓库地址
-            if (len(self.location_collect_split_district[i]) != 1):
-                all_path.append(self.find_path(self.calculate_distance(self.location_collect_split_district[i])))
+        for i in range(len(self.location_collect_split_kmeans)):
+            if (len(self.location_collect_split_kmeans[i]) >= 2):
+                print(self.calculate_distance(self.location_collect_split_kmeans[i]))
+                # all_path.append(self.find_path(self.calculate_distance(self.location_collect_split_kmeans[i])))
+            elif (len(self.location_collect_split_kmeans[i]) == 1):
+                all_path.append(self.location_collect_split_kmeans[i][0][0])
             else:
                 continue
         return all_path
@@ -556,7 +516,7 @@ class VRPTW_model(object):
             processed_final_path.append(addresses)
         return processed_final_path, final_path
 
-# --------------------------------------------------------- #
+    # --------------------------------------------------------- #
 
     # 计算车载重量和车载空间的利用率, 以及总距离
     def calculate_info(self, processed_final_path, final_path, file_name):
@@ -679,17 +639,18 @@ if __name__ == "__main__":
         # print(location_collect)
         distance_store = order_data.calculate_distance(location_collect)
         # print(distance_store)
-        order_data.location_collect_split(location_collect)
+        location_collect_split_kmeans = order_data.cluster_locations_kmeans(location_collect)
+        # print(location_collect_split_kmeans)
         
         # 运行dijkstra算法, 并且找到最短路径, 再将路径绘制到地图上
-        dijkstra_path = order_data.run_find_path()
-        # print(dijkstra_path)
-        processed_final_path, final_path = order_data.process_dijkstra_path(dijkstra_path)
+        dijkstra_path_kmeans = order_data.run_find_path()
+        # print(dijkstra_path_kmeans)
+        # processed_final_path, final_path = order_data.process_dijkstra_path(dijkstra_path_kmeans)
         # print(processed_final_path)
         # 打印订单数量, 车载重量, 车载空间的利用率和总距离
-        order_data.calculate_info(processed_final_path, final_path, file)
+        # order_data.calculate_info(processed_final_path, final_path, file)
         # 将路径绘制到地图上
-        order_data.plot_route_on_map(location_collect, processed_final_path)
+        # order_data.plot_route_on_map(location_collect, processed_final_path)
 
     start_find_path()
     
