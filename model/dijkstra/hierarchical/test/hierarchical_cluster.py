@@ -11,31 +11,31 @@ def cluster_location_hierarchical(location_collect, distance_threshold=1.0):
 
     返回:
     - clustered_list: 聚类后的订单列表, 每个簇的第一个位置是仓库信息
-    
-    使用了linkage函数, 并选择了ward方法进行聚类. 
-    Ward方法是一种最小化总方差的聚类方法, 属于凝聚层次聚类的一种. 其主要特点是:
-    - 凝聚层次聚类：从每个点自身作为一个簇开始, 不断合并最近的簇, 直到满足停止条件. 
     """
-    # 提取经纬度信息
+    # 提取经纬度信息, 将每个订单的经纬度组成一个坐标数组
     coords = np.array([(order[1], order[2]) for order in location_collect], dtype=float)
 
-    # 使用层次聚类进行聚类
-    Z = linkage(coords, method='ward')  # 采用Ward方法进行层次聚类
+    # 使用层次聚类中的Ward方法对坐标进行聚类, 返回一个层次聚类树的链表表示, 这个链表表示了在聚类过程中每一步合并的簇. 
+    Z = linkage(coords, method='ward')
+
+    # 根据距离阈值将层次聚类树截断, 生成平坦的簇标签
     labels = fcluster(Z, t=distance_threshold, criterion='distance')
 
-    # 初始化聚类结果字典
-    clustered_dict = {i: [] for i in range(1, max(labels) + 1)}
+    # 创建了一个字典, 字典的键是簇标签, 值是空列表, 用于存储每个簇中的数据点
+    clustered_dict = {}
+    for label in np.unique(labels):
+        clustered_dict[label] = []
 
-    # 分配订单到相应的簇
+    # 将每个订单分配到相应的簇中
     for order, label in zip(location_collect, labels):
         clustered_dict[label].append(order)
 
-    # 构建结果列表
+    # 构建结果列表, 确保每个簇的第一个位置是仓库信息
     clustered_list = []
     warehouse_info = ['北京市顺义区顺平路576号', 40.1196490409737, 116.60616697651679, '仓库']
     
     for cluster in clustered_dict.values():
-        # 确保仓库信息在每个簇的第一个位置
+        # 如果簇中没有仓库信息, 将其添加到第一个位置
         if warehouse_info not in cluster:
             cluster.insert(0, warehouse_info)
         clustered_list.append(cluster)

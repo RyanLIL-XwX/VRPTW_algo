@@ -357,6 +357,15 @@ class VRPTW_model(object):
     
     # 划分location_collect中的信息, 通过区的名称分别加入不同的容器中
     def location_collect_split(self, location_collect):
+        """
+        对所有订单的地址信息进行划分, 通过区的名称分别加入不同的容器中
+
+        参数:
+        - location_collect: 所有订单的地址信息
+
+        返回:
+            用于储存北京所有区的地址信息的list container, 同时这些list都被加入到self.location_collect_split_district中
+        """
         for i in range(len(location_collect)):
             if (location_collect[i][3] == "东城区" or location_collect[i][3] == "仓库"):
                 self.dongcheng.append(location_collect[i])

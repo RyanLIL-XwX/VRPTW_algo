@@ -354,14 +354,18 @@ class VRPTW_model(object):
         # 提取经纬度信息
         coords = np.array([(order[1], order[2]) for order in location_collect], dtype=float)
 
-        # 使用层次聚类进行聚类
-        Z = linkage(coords, method='ward')  # 采用Ward方法进行层次聚类
+        # 使用层次聚类中的Ward方法对坐标进行聚类, 返回一个层次聚类树的链表表示, 这个链表表示了在聚类过程中每一步合并的簇. 
+        Z = linkage(coords, method='ward')
+
+        # 根据距离阈值将层次聚类树截断, 生成平坦的簇标签
         labels = fcluster(Z, t=distance_threshold, criterion='distance')
 
-        # 初始化聚类结果字典
-        clustered_dict = {i: [] for i in range(1, max(labels) + 1)}
+        # 创建了一个字典, 字典的键是簇标签, 值是空列表, 用于存储每个簇中的数据点
+        clustered_dict = {}
+        for label in np.unique(labels):
+            clustered_dict[label] = []
 
-        # 分配订单到相应的簇
+        # 将每个订单分配到相应的簇中
         for order, label in zip(location_collect, labels):
             clustered_dict[label].append(order)
 
