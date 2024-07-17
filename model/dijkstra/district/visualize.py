@@ -49,7 +49,7 @@ def plot_route_on_map(location_collect, shortest_path):
                 ).add_to(route_map)
         
     # 保存地图到文件
-    route_map.save("route_map.html")
+    route_map.save("test_visualize.html")
 
 # 示例数据
 location_collect = [["北京市顺义区顺平路576号", 40.1196490409737, 116.60616697651679, "仓库"], 

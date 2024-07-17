@@ -6,7 +6,7 @@ from datetime import datetime, timedelta # 用来计算时间
 import heapdict # dijkstra算法中使用的数据结构, 一种优先队列
 import folium # 用于绘制地图
 import numpy as np
-from sklearn.cluster import KMeans
+from scipy.cluster.hierarchy import linkage, fcluster
 
 class VRPTW_model(object):
     def __init__(self, file_path):
@@ -41,7 +41,7 @@ class VRPTW_model(object):
         self.set_receive_latest_time = None # 设置最晚收货时间
         
         # 给信息划分并分别处理, 全部都是和self.location_collect一样的结构
-        self.location_collect_split_kmeans = [] # 储存K-means分类器的地址信息
+        self.location_collect_split_hierarchical = [] # 储存层次聚类分类器的地址信息
     
     # 函数用于读取txt文件中json格式的数据
     def load_data(self):
@@ -335,35 +335,48 @@ class VRPTW_model(object):
     
     # --------------------------------------------------------- #
 
-    # 通过K-means来划分location_collect中的信息
-    def cluster_locations_kmeans(self, location_collect, n_clusters=5, n_init=10):
+    # 使用层次聚类对订单进行聚类
+    def cluster_location_hierarchical(self, location_collect, distance_threshold=1.0):
         """
-        对地址进行K-means聚类
+        对订单进行层次聚类
 
         参数:
-        location_collect: 地址的列表, 每个地址包含名称、纬度、经度和描述信息
-        n_clusters: 聚类的簇数量
-        n_init: K-means算法的初始运行次数
+        - location_collect: 所有的订单信息
+        - distance_threshold: 距离阈值，用于确定簇的数量
 
         返回:
-        clustered_location_collect: 聚类后的地址列表
+        - clustered_list: 聚类后的订单列表，每个簇的第一个位置是仓库信息
+        
+        使用了linkage函数, 并选择了ward方法进行聚类. 
+        - Ward方法是一种最小化总方差的聚类方法, 属于凝聚层次聚类的一种. 其主要特点是:
+        - 凝聚层次聚类：从每个点自身作为一个簇开始, 不断合并最近的簇, 直到满足停止条件. 
         """
-        warehouse_info = [self.warehouse["address"], float(self.warehouse["latitude"]), float(self.warehouse["longitude"]), "仓库"] # 仓库的地址
-        print(warehouse_info)
-        # 提取所有地址的纬度和经度, 并将其存储在coords数组中. loc[1]是纬度, loc[2]是经度
-        coords = np.array([[loc[1], loc[2]] for loc in location_collect], dtype=float)
+        # 提取经纬度信息
+        coords = np.array([(order[1], order[2]) for order in location_collect], dtype=float)
 
-        # 使用K-means进行聚类
-        kmeans = KMeans(n_clusters=n_clusters, n_init=n_init, random_state=0).fit(coords)
-        labels = kmeans.labels_
+        # 使用层次聚类进行聚类
+        Z = linkage(coords, method='ward')  # 采用Ward方法进行层次聚类
+        labels = fcluster(Z, t=distance_threshold, criterion='distance')
 
-        # 将地址按簇分类
-        clustered_location_collect = [[warehouse_info] for _ in range(n_clusters)]
-        for label, loc in zip(labels, location_collect):
-            clustered_location_collect[label].append(loc)
+        # 初始化聚类结果字典
+        clustered_dict = {i: [] for i in range(1, max(labels) + 1)}
 
-        self.location_collect_split_kmeans = clustered_location_collect # 更新self.location_collect_split_kmeans属性
-        return self.location_collect_split_kmeans
+        # 分配订单到相应的簇
+        for order, label in zip(location_collect, labels):
+            clustered_dict[label].append(order)
+
+        # 构建结果列表
+        clustered_list = []
+        warehouse_info = [self.warehouse["address"], float(self.warehouse["latitude"]), float(self.warehouse["longitude"]), "仓库"]
+        
+        for cluster in clustered_dict.values():
+            # 确保仓库信息在每个簇的第一个位置
+            if (warehouse_info not in cluster):
+                cluster.insert(0, warehouse_info)
+            clustered_list.append(cluster)
+
+        self.location_collect_split_hierarchical = clustered_list
+        return self.location_collect_split_hierarchical
     
     # --------------------------------------------------------- #
     
@@ -446,12 +459,11 @@ class VRPTW_model(object):
     # 运行find_path()函数, 每次调用一个cluster的数据去进行最短路径的查找
     def run_find_path(self):
         all_path = list() # 用于储存所有的最短路径
-        for i in range(len(self.location_collect_split_kmeans)):
-            if (len(self.location_collect_split_kmeans[i]) >= 2):
-                print(self.calculate_distance(self.location_collect_split_kmeans[i]))
-                # all_path.append(self.find_path(self.calculate_distance(self.location_collect_split_kmeans[i])))
-            elif (len(self.location_collect_split_kmeans[i]) == 1):
-                all_path.append(self.location_collect_split_kmeans[i][0][0])
+        for i in range(len(self.location_collect_split_hierarchical)):
+            if (len(self.location_collect_split_hierarchical[i]) >= 2):
+                all_path.append(self.find_path(self.calculate_distance(self.location_collect_split_hierarchical[i])))
+            elif (len(self.location_collect_split_hierarchical[i]) == 1):
+                all_path.append(self.location_collect_split_hierarchical[i][0][0])
             else:
                 continue
         return all_path
@@ -639,18 +651,18 @@ if __name__ == "__main__":
         # print(location_collect)
         distance_store = order_data.calculate_distance(location_collect)
         # print(distance_store)
-        location_collect_split_kmeans = order_data.cluster_locations_kmeans(location_collect)
-        # print(location_collect_split_kmeans)
+        location_collect_split_hierarchical = order_data.cluster_location_hierarchical(location_collect)
+        # print(location_collect_split_hierarchical)
         
         # 运行dijkstra算法, 并且找到最短路径, 再将路径绘制到地图上
-        dijkstra_path_kmeans = order_data.run_find_path()
-        # print(dijkstra_path_kmeans)
-        # processed_final_path, final_path = order_data.process_dijkstra_path(dijkstra_path_kmeans)
+        dijkstra_path_hierarchical = order_data.run_find_path()
+        # print(dijkstra_path_hierarchical)
+        processed_final_path, final_path = order_data.process_dijkstra_path(dijkstra_path_hierarchical)
         # print(processed_final_path)
         # 打印订单数量, 车载重量, 车载空间的利用率和总距离
-        # order_data.calculate_info(processed_final_path, final_path, file)
+        order_data.calculate_info(processed_final_path, final_path, file)
         # 将路径绘制到地图上
-        # order_data.plot_route_on_map(location_collect, processed_final_path)
+        order_data.plot_route_on_map(location_collect, processed_final_path)
 
     start_find_path()
     
