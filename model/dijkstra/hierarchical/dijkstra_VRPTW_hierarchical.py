@@ -348,8 +348,8 @@ class VRPTW_model(object):
         - clustered_list: 聚类后的订单列表，每个簇的第一个位置是仓库信息
         
         使用了linkage函数, 并选择了ward方法进行聚类. 
-        - Ward方法是一种最小化总方差的聚类方法, 属于凝聚层次聚类的一种. 其主要特点是:
-        - 凝聚层次聚类：从每个点自身作为一个簇开始, 不断合并最近的簇, 直到满足停止条件. 
+        - Ward方法是一种最小化总方差的聚类方法, 属于凝聚层次聚类的一种.
+        - 凝聚层次聚类: 从每个点自身作为一个簇开始, 不断合并最近的簇, 直到满足停止条件. 
         """
         # 提取经纬度信息
         coords = np.array([(order[1], order[2]) for order in location_collect], dtype=float)

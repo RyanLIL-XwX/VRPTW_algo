@@ -7,10 +7,14 @@ def cluster_location_hierarchical(location_collect, distance_threshold=1.0):
 
     参数:
     - location_collect: 所有的订单信息
-    - distance_threshold: 距离阈值, 用于确定簇的数量
+    - distance_threshold: 距离阈值，用于确定簇的数量
 
     返回:
-    - clustered_list: 聚类后的订单列表, 每个簇的第一个位置是仓库信息
+    - clustered_list: 聚类后的订单列表，每个簇的第一个位置是仓库信息
+    
+    使用了linkage函数, 并选择了ward方法进行聚类. 
+    - Ward方法是一种最小化总方差的聚类方法, 属于凝聚层次聚类的一种.
+    - 凝聚层次聚类: 从每个点自身作为一个簇开始, 不断合并最近的簇, 直到满足停止条件. 
     """
     # 提取经纬度信息, 将每个订单的经纬度组成一个坐标数组
     coords = np.array([(order[1], order[2]) for order in location_collect], dtype=float)
