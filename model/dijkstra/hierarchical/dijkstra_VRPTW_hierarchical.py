@@ -450,6 +450,12 @@ class VRPTW_model(object):
              
     def find_path(self, distance_store):
         dijkstra_path = list() # 用于储存dijkstra算法的最短路径
+        # edge case: 如果只有一个订单地址, 则直接返回这个订单地址
+        if (len(distance_store) == 1):
+            for i in distance_store.keys():
+                dijkstra_path = [(i[1], distance_store[i])]
+                break
+            return dijkstra_path
         first_order_address = self.get_first_order_address(distance_store) # 获取第一个订单的地址
         distance_store_copy = distance_store.copy() # 用于储存所有的距离信息
         # 删除所有和仓库有关的距离信息, 因为我们已经不再需要了
@@ -480,7 +486,7 @@ class VRPTW_model(object):
         for order_path in all_path:
             check_weight = 0.0 # 用于检查车载重量是否可行
             check_volume = 0.0 # 用于检查车载空间是否可行
-            arrive_time = self.get_receive_earliest_time(order_path[1][0]) # 到达当前订单的时间(分钟)
+            arrive_time = self.get_receive_earliest_time(order_path[0][0]) # 到达当前订单的时间(分钟)
             leave_time = "" # 离开当前订单的时间(分钟)
             current_pointer = 0 # 访问当前订单的指针
             pointer = 0 # 如果当前订单不可行, 用来检查下一个可行订单
