@@ -61,4 +61,4 @@ This report summarizes the weight and volume utilization for a fleet of cars, al
 ## Image
 
 <!-- ![Transport Fleet](/Users/ryanlil86/Desktop/database/job/intern/凯捷/project/model/dijkstra/k_means/route_map_beijing712.png) -->
-![Transport Fleet]()
+![Transport Fleet](https://github.com/RyanLIL-XwX/VRPTW_algo/blob/main/model/dijkstra/k_means/route_map_beijing712.png)
