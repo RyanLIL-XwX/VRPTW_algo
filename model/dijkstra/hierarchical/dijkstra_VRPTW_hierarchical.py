@@ -411,7 +411,7 @@ class VRPTW_model(object):
     
     # dijkstra算法, 用于计算最短路径
     def dijkstra(self, distance_store, start_address):
-        # 开始创建图的邻接表表示法, 一个点到其他点的距离, 是一个dictionary容器: 
+        # 开始创建图的邻接表表示法, 一个点到其他点的距离, 是一个dictionary容器:
         # {address1: {address2: distance, address3: distance, ...}, ...}
         graph = {}
         for (address1, address2), distance in distance_store.items():
@@ -580,7 +580,7 @@ class VRPTW_model(object):
                     total_distance += i[j][1]
         print("Total distance for the {}: {:.2f}km and Total number of cars using: [{}]".format(file_name, total_distance, len(processed_final_path)))
 
-    # 将路径绘制到地图上
+    # 将路径绘制在地图上
     def plot_route_on_map(self, location_collect, shortest_path):
         # 创建一个folium地图对象, 初始位置设为仓库的位置
         map_center = [location_collect[0][1], location_collect[0][2]]
@@ -599,7 +599,19 @@ class VRPTW_model(object):
         location_dict = {loc[0]: loc[1:] for loc in location_collect}
         
         # 为每条路径创建一个不同颜色的线条
-        colors = ["blue", "green", "purple", "orange", "darkred", "lightred", "darkblue", "darkgreen", "cadetblue", "darkpurple", "pink", "lightblue", "lightgreen"]
+        colors = ["cyan", "lime", "magenta", "yellow", "lightred", "lightblue", "lightgreen"]
+        
+        # 标记仓库位置
+        warehouse = [self.warehouse["address"], float(self.warehouse["latitude"]), float(self.warehouse["longitude"]), "仓库"]
+        folium.CircleMarker(
+            location=[warehouse[1], warehouse[2]],
+            radius=15,  # 圆点半径
+            color="red",  # 圆点颜色
+            fill=True,
+            fill_color="red",
+            fill_opacity=0.9,
+            popup=folium.Popup(f'<div style="white-space: nowrap;">{warehouse[0]}</div>', max_width=300)
+        ).add_to(route_map)
         
         # 遍历shortest_path中的每个子列表
         for index, path in enumerate(shortest_path):
@@ -612,26 +624,40 @@ class VRPTW_model(object):
                     latitude, longitude, _ = location_dict[address]
                     route_coords.append([latitude, longitude])
             
-            # 绘制路径
+            # 只有在路径坐标列表不为空时绘制路径
             if route_coords:
                 # 添加路径线条到地图, 并设置颜色, 宽度和透明度
                 folium.PolyLine(route_coords, color=colors[index % len(colors)], weight=5, opacity=0.8).add_to(route_map)
                 
                 # 为每个路径点添加小的彩色点
-                for coord, address in zip(route_coords, path):
-                    folium.CircleMarker(
-                        location=coord,
-                        radius=5,  # 圆点半径
-                        color=colors[index % len(colors)],  # 圆点颜色
-                        fill=True,
-                        fill_color=colors[index % len(colors)],
-                        fill_opacity=0.8,
-                        popup=folium.Popup(f'<div style="white-space: nowrap;">{address}</div>', max_width=300)
-                    ).add_to(route_map)
+                for i, (coord, address) in enumerate(zip(route_coords, path)):
+                    if coord:
+                        if i == 0:  # 路径的第一个点用正方形标记
+                            folium.RegularPolygonMarker(
+                                location=coord,
+                                number_of_sides=4,
+                                radius=8,  # 正方形边长
+                                color=colors[index % len(colors)],  # 正方形颜色
+                                fill=True,
+                                fill_color=colors[index % len(colors)],
+                                fill_opacity=0.8,
+                                popup=folium.Popup(f'<div style="white-space: nowrap;">{address}</div>', max_width=300)
+                            ).add_to(route_map)
+                        else:  # 其他点用圆形标记
+                            folium.CircleMarker(
+                                location=coord,
+                                radius=5,  # 圆点半径
+                                color=colors[index % len(colors)],  # 圆点颜色
+                                fill=True,
+                                fill_color=colors[index % len(colors)],
+                                fill_opacity=0.8,
+                                popup=folium.Popup(f'<div style="white-space: nowrap;">{address}</div>', max_width=300)
+                            ).add_to(route_map)
             
         # 保存地图到文件
         route_map.save("route_map.html")
-          
+
+   
 if __name__ == "__main__":
     # 创建一个VRPTW_model对象, 并将file作为参数传入
     # 函数: load_data(), parse_data(), __str__()
