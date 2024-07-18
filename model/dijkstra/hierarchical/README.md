@@ -51,6 +51,7 @@ This report summarizes the weight and volume utilization for a fleet of cars, al
 
 - **Total Distance for `beijing712.txt`:** 10058.89 km
 - **Total Number of Cars Used:** 31
+- **Total Number of single vertex:** 0
 - **Classification mode:** Classify data by Agglomerative hierarchical clustering
 
 ## Image
