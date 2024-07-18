@@ -549,8 +549,11 @@ class VRPTW_model(object):
         max_weight = self.vehicle_type["loadableWeight"] # 车辆的最大载重量
         max_volume = self.vehicle_type["loadableVolume"] # 车辆的最大载重量
         order = 0 # 用于记录订单的数量
+        single_vertex = 0 # 用于记录孤点的数量
         # 计算车载重量和车载空间的利用率
         for i in processed_final_path:
+            if (len(i) == 1):
+                single_vertex += 1
             for j in i:
                 weight_record += self.calculate_weight(j)
                 volume_record += self.calculate_volume(j)
@@ -585,6 +588,7 @@ class VRPTW_model(object):
                 else:
                     total_distance += i[j][1]
         print("Total distance for the {}: {:.2f}km and Total number of cars using: [{}]".format(file_name, total_distance, len(processed_final_path)))
+        print("Total number of single vertex: {}\n".format(single_vertex))
 
     # 将路径绘制在地图上
     def plot_route_on_map(self, location_collect, shortest_path):
