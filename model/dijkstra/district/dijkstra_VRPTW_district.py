@@ -1,6 +1,7 @@
 # VRPTW
 # Author: Hanzhen Qin
 import json
+import chardet # 用于检测文件编码格式
 from haversine import haversine, Unit # 用来计算两个经纬度之间的距离
 from datetime import datetime, timedelta # 用来计算时间
 import heapdict # dijkstra算法中使用的数据结构, 一种优先队列
@@ -60,18 +61,25 @@ class VRPTW_model(object):
     # 函数用于读取txt文件中json格式的数据
     def load_data(self):
         try:
-            # file = open(self.file_path, 'r', encoding='utf-8') # 打开文件, 读取模式使用仅读取, 编码格式为utf-8
-            # 使用with来打开文件可以确保在文件使用完毕后自动关闭文件
-            with open(self.file_path, 'r', encoding='utf-8') as file:
+            # 检测文件的编码
+            with open(self.file_path, 'rb') as file:
+                raw_data = file.read()
+                result = chardet.detect(raw_data)
+                encoding = result['encoding']
+            # 使用检测到的编码打开文件
+            with open(self.file_path, 'r', encoding=encoding) as file:
                 file_content = file.read()  # 读取txt文件内容
                 self.data = json.loads(file_content)  # 将json字符串解析为python字典
-        # 如果读取txt文件时发生问题, 将会根据情况返回两个报错
+        # 如果读取txt文件时发生问题, 将会根据情况返回3个报错
         except FileNotFoundError:
             # 当你尝试打开一个不存在的文件时, python会抛出FileNotFoundError异常
             print(f"File {self.file_path} not found.")
         except json.JSONDecodeError:
             # 当尝试解码一个无效的json字符串时, python会抛出json.JSONDecodeError异常
             print("Error decoding JSON from the file.\n")
+        except Exception as e:
+            # 捕获所有其他异常
+            print(f"Detect other type of error: {e}")
     
     # 函数用于解析json数据
     def parse_data(self):
@@ -355,17 +363,16 @@ class VRPTW_model(object):
             
     # --------------------------------------------------------- #
     
-    # 划分location_collect中的信息, 通过区的名称分别加入不同的容器中
+    """
+    对location_collect中所有订单的地址信息进行划分, 通过区的名称分别加入不同的容器中
+
+    参数:
+    - location_collect: 所有订单的地址信息
+
+    返回:
+        用于储存北京所有区的地址信息的list container, 同时这些list都被加入到self.location_collect_split_district中
+    """
     def location_collect_split(self, location_collect):
-        """
-        对所有订单的地址信息进行划分, 通过区的名称分别加入不同的容器中
-
-        参数:
-        - location_collect: 所有订单的地址信息
-
-        返回:
-            用于储存北京所有区的地址信息的list container, 同时这些list都被加入到self.location_collect_split_district中
-        """
         for i in range(len(location_collect)):
             if (location_collect[i][3] == "东城区" or location_collect[i][3] == "仓库"):
                 self.dongcheng.append(location_collect[i])
@@ -417,7 +424,16 @@ class VRPTW_model(object):
         self.location_collect_split_district.append(self.yanqing)
         return self.dongcheng, self.xicheng, self.chaoyang, self.fengtai, self.shijingshan, self.haidian, self.mentougou, self.fangshan, self.tongzhou, self.shunyi, self.changping, self.daxing, self.huairou, self.pinggu, self.miyun, self.yanqing
     
-    # main part: finding path algorithm
+    # --------------------------------------------------------- #
+    
+    """
+    main part: dijkstra algorithm
+    - 通过dijkstra算法找到最短路径
+    
+    返回:
+    - dijkstra_path: 每一块数据的最短路径
+    - all_path: 所有的最短路径
+    """
     
     # 找到从仓库出发的第一个订单的地址
     def get_first_order_address(self, distance_store):
@@ -623,7 +639,7 @@ class VRPTW_model(object):
         print("Total number of single vertex: {}\n".format(single_vertex))
 
     # 将路径绘制在地图上
-    def plot_route_on_map(self, location_collect, shortest_path):
+    def plot_route_on_map(self, location_collect, shortest_path, file_name):
         # 创建一个folium地图对象, 初始位置设为仓库的位置
         map_center = [location_collect[0][1], location_collect[0][2]]
         route_map = folium.Map(location=map_center, zoom_start=10, tiles=None)
@@ -697,7 +713,8 @@ class VRPTW_model(object):
                             ).add_to(route_map)
             
         # 保存地图到文件
-        route_map.save("route_map.html")
+        file_name = file_name.split(".")[0] # 去除文件的扩展名, split()函数在原来的string中更具"."返回一个分割过的list, 然后取第一个元素
+        route_map.save("{}_dij_VRPTW_hierarchical.html".format(file_name))
 
           
 if __name__ == "__main__":
@@ -733,7 +750,7 @@ if __name__ == "__main__":
         # 打印订单数量, 车载重量, 车载空间的利用率和总距离
         order_data.calculate_info(processed_final_path, final_path, file)
         # 将路径绘制到地图上
-        order_data.plot_route_on_map(location_collect, processed_final_path)
+        order_data.plot_route_on_map(location_collect, processed_final_path, file)
 
     start_find_path()
     

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_92dc7dbe5a36c3dc4a31e778b97b117b {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+        
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-dvf/0.3.0/leaflet-dvf.markers.min.js"></script>
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_92dc7dbe5a36c3dc4a31e778b97b117b" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_92dc7dbe5a36c3dc4a31e778b97b117b = L.map(
+                "map_92dc7dbe5a36c3dc4a31e778b97b117b",
+                {
+                    center: [40.1196490409737, 116.60616697651679],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 10,
+                    zoomControl: true,
+                    preferCanvas: false,
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_2567463e0a673162a0ebb0afa204d991 = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+                {"attribution": "Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.", "detectRetina": false, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            );
+        
+    
+            tile_layer_2567463e0a673162a0ebb0afa204d991.addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+            var circle_marker_14079206c239dbcc2ddaf3ba002d21b1 = L.circleMarker(
+                [40.1196490409737, 116.60616697651679],
+                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 15, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_e80a48f078e7c95d7d33bafe17d1b640 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_c9f173ae766e4b2aa3ae50bbd8b7f0f4 = $(`<div id="html_c9f173ae766e4b2aa3ae50bbd8b7f0f4" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市顺义区顺平路576号</div></div>`)[0];
+                popup_e80a48f078e7c95d7d33bafe17d1b640.setContent(html_c9f173ae766e4b2aa3ae50bbd8b7f0f4);
+            
+        
+
+        circle_marker_14079206c239dbcc2ddaf3ba002d21b1.bindPopup(popup_e80a48f078e7c95d7d33bafe17d1b640)
+        ;
+
+        
+    
+    
+            var poly_line_36551f7cae3fb1cd37af35a1328fb1fb = L.polyline(
+                [[40.361323, 116.841688], [40.380933, 116.852228], [40.662436, 117.251497]],
+                {"bubblingMouseEvents": true, "color": "cyan", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "cyan", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 5}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+            var regular_polygon_marker_53b19429ff8646ea1098a649cc16041d = new L.RegularPolygonMarker(
+                [40.361323, 116.841688],
+                {"bubblingMouseEvents": true, "color": "cyan", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "numberOfSides": 4, "opacity": 1.0, "radius": 8, "rotation": 0, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_48362b61d57862a1338f6784e3c276dc = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_de8762c3ea250b73c03d5df5bf28769d = $(`<div id="html_de8762c3ea250b73c03d5df5bf28769d" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市密云区滨河路178号万象汇一层</div></div>`)[0];
+                popup_48362b61d57862a1338f6784e3c276dc.setContent(html_de8762c3ea250b73c03d5df5bf28769d);
+            
+        
+
+        regular_polygon_marker_53b19429ff8646ea1098a649cc16041d.bindPopup(popup_48362b61d57862a1338f6784e3c276dc)
+        ;
+
+        
+    
+    
+            var circle_marker_1bc910d96fbe5b64eaa58b8a55b7f921 = L.circleMarker(
+                [40.380933, 116.852228],
+                {"bubblingMouseEvents": true, "color": "cyan", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_4bbcf167121a8b884943a7e3c57699bb = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_556c4134da0434c48616dbc036936dba = $(`<div id="html_556c4134da0434c48616dbc036936dba" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市密云区密云镇鼓楼南大街1号1层的1129-F1A005、1129-F1-A004、1129-F1-B008店铺</div></div>`)[0];
+                popup_4bbcf167121a8b884943a7e3c57699bb.setContent(html_556c4134da0434c48616dbc036936dba);
+            
+        
+
+        circle_marker_1bc910d96fbe5b64eaa58b8a55b7f921.bindPopup(popup_4bbcf167121a8b884943a7e3c57699bb)
+        ;
+
+        
+    
+    
+            var circle_marker_957c1f1aa6a4d77acc57639b59081f67 = L.circleMarker(
+                [40.662436, 117.251497],
+                {"bubblingMouseEvents": true, "color": "cyan", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_eda0fe9fb2c1e2708d16e29dc26ec511 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_52676f32d6bf6d4699ad02de5a75ccd5 = $(`<div id="html_52676f32d6bf6d4699ad02de5a75ccd5" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市密云县古北口镇司马台村国际休闲旅游度假区第一层101单元</div></div>`)[0];
+                popup_eda0fe9fb2c1e2708d16e29dc26ec511.setContent(html_52676f32d6bf6d4699ad02de5a75ccd5);
+            
+        
+
+        circle_marker_957c1f1aa6a4d77acc57639b59081f67.bindPopup(popup_eda0fe9fb2c1e2708d16e29dc26ec511)
+        ;
+
+        
+    
+    
+            var poly_line_829a8764395a7df64a2e17e459512586 = L.polyline(
+                [[40.104742, 116.419048], [40.104742, 116.419048], [40.063747, 116.421787], [40.04709, 116.407605], [40.07174, 116.353812], [39.946079, 116.43794], [39.938815, 116.443489], [39.936825, 116.442792], [39.898703, 116.454626], [39.890756, 116.443508], [40.240958, 116.176189], [40.240958, 116.176189], [39.811108, 116.449658], [39.797382, 116.346796], [39.795298, 116.33387], [39.770126, 116.340761], [39.73531, 116.349419]],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "lime", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 5}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+            var regular_polygon_marker_4281bd3be9fff276b4653086d06f85e5 = new L.RegularPolygonMarker(
+                [40.104742, 116.419048],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "numberOfSides": 4, "opacity": 1.0, "radius": 8, "rotation": 0, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_baa407fab76578e04db53b415e129c4a = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_5340d08d3f3e785bc27e81d620d089eb = $(`<div id="html_5340d08d3f3e785bc27e81d620d089eb" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市昌平区立汤路186号院1号楼02层(02)201内208单元</div></div>`)[0];
+                popup_baa407fab76578e04db53b415e129c4a.setContent(html_5340d08d3f3e785bc27e81d620d089eb);
+            
+        
+
+        regular_polygon_marker_4281bd3be9fff276b4653086d06f85e5.bindPopup(popup_baa407fab76578e04db53b415e129c4a)
+        ;
+
+        
+    
+    
+            var circle_marker_8c8a72ef7e9dff9bdf43949f110b327a = L.circleMarker(
+                [40.104742, 116.419048],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_9ba0aa518127b6470611024d1e113141 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_a21ac079f5d7ef8ea7f08397e751a945 = $(`<div id="html_a21ac079f5d7ef8ea7f08397e751a945" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市昌平区立汤路186号院1号楼B1层B1041</div></div>`)[0];
+                popup_9ba0aa518127b6470611024d1e113141.setContent(html_a21ac079f5d7ef8ea7f08397e751a945);
+            
+        
+
+        circle_marker_8c8a72ef7e9dff9bdf43949f110b327a.bindPopup(popup_9ba0aa518127b6470611024d1e113141)
+        ;
+
+        
+    
+    
+            var circle_marker_d2c34b98ce309d50482da6f24ddcf03f = L.circleMarker(
+                [40.063747, 116.421787],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_9e7de51370a5d6ed3fe36e05b1cfea80 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_fcf601f4e1e44a4aa06bcdf9cc845476 = $(`<div id="html_fcf601f4e1e44a4aa06bcdf9cc845476" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市昌平区立汤路188号院1号万优汇商厦1层</div></div>`)[0];
+                popup_9e7de51370a5d6ed3fe36e05b1cfea80.setContent(html_fcf601f4e1e44a4aa06bcdf9cc845476);
+            
+        
+
+        circle_marker_d2c34b98ce309d50482da6f24ddcf03f.bindPopup(popup_9e7de51370a5d6ed3fe36e05b1cfea80)
+        ;
+
+        
+    
+    
+            var circle_marker_28c6987d65dc8393ab15a7d7af3a951b = L.circleMarker(
+                [40.04709, 116.407605],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_f527054e02b4001c01722bd0f238412b = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_1fa9ff4137d7ec9156ec62547c2ebb43 = $(`<div id="html_1fa9ff4137d7ec9156ec62547c2ebb43" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市昌平区陈家营西路3号院23号楼 招商嘉铭珑原商业楼 1层101-2单元</div></div>`)[0];
+                popup_f527054e02b4001c01722bd0f238412b.setContent(html_1fa9ff4137d7ec9156ec62547c2ebb43);
+            
+        
+
+        circle_marker_28c6987d65dc8393ab15a7d7af3a951b.bindPopup(popup_f527054e02b4001c01722bd0f238412b)
+        ;
+
+        
+    
+    
+            var circle_marker_397bf8998a30538cf7703f1d0db42690 = L.circleMarker(
+                [40.07174, 116.353812],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_1df552ce60f5571c77ce943c41b10e1a = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_026b88d2b121883c069d6e01385bc85e = $(`<div id="html_026b88d2b121883c069d6e01385bc85e" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市昌平区黄平路19号院1号楼B单元101-02室</div></div>`)[0];
+                popup_1df552ce60f5571c77ce943c41b10e1a.setContent(html_026b88d2b121883c069d6e01385bc85e);
+            
+        
+
+        circle_marker_397bf8998a30538cf7703f1d0db42690.bindPopup(popup_1df552ce60f5571c77ce943c41b10e1a)
+        ;
+
+        
+    
+    
+            var circle_marker_d402aa9aa0ab938c7c5b2186c5100d4e = L.circleMarker(
+                [39.946079, 116.43794],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_8580ada71e59a3d3f15773f3ce337aa9 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_9a8fb17d41cbe3e3327d5a3d0bf083f9 = $(`<div id="html_9a8fb17d41cbe3e3327d5a3d0bf083f9" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市东城区东直门南大街1号2层1-1202内P02-20商铺</div></div>`)[0];
+                popup_8580ada71e59a3d3f15773f3ce337aa9.setContent(html_9a8fb17d41cbe3e3327d5a3d0bf083f9);
+            
+        
+
+        circle_marker_d402aa9aa0ab938c7c5b2186c5100d4e.bindPopup(popup_8580ada71e59a3d3f15773f3ce337aa9)
+        ;
+
+        
+    
+    
+            var circle_marker_0014f448dd79d7e0d4a8aedc763e87fe = L.circleMarker(
+                [39.938815, 116.443489],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_9a17caeed781d31339b77d6818c15529 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_79d758f720194e9f0aa960ab8347b131 = $(`<div id="html_79d758f720194e9f0aa960ab8347b131" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市东城区新中街瑞士公寓1、2层L103&L202A</div></div>`)[0];
+                popup_9a17caeed781d31339b77d6818c15529.setContent(html_79d758f720194e9f0aa960ab8347b131);
+            
+        
+
+        circle_marker_0014f448dd79d7e0d4a8aedc763e87fe.bindPopup(popup_9a17caeed781d31339b77d6818c15529)
+        ;
+
+        
+    
+    
+            var circle_marker_703e97656e4177d50d4a995c0caf5763 = L.circleMarker(
+                [39.936825, 116.442792],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_bed5e5c50912dd93b134f383e4ebec67 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_b67c55165b872d82d4d7787438ed1506 = $(`<div id="html_b67c55165b872d82d4d7787438ed1506" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市东城区北京市东城区朝阳门北大街8号2号楼1层2-58</div></div>`)[0];
+                popup_bed5e5c50912dd93b134f383e4ebec67.setContent(html_b67c55165b872d82d4d7787438ed1506);
+            
+        
+
+        circle_marker_703e97656e4177d50d4a995c0caf5763.bindPopup(popup_bed5e5c50912dd93b134f383e4ebec67)
+        ;
+
+        
+    
+    
+            var circle_marker_51321a8cc5e6a77be0d297b9e0325139 = L.circleMarker(
+                [39.898703, 116.454626],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_66651aedd78e2ea32a102cd798d1930c = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_638cc844b7fcea9a51de5ad223fdca0f = $(`<div id="html_638cc844b7fcea9a51de5ad223fdca0f" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市东城区广渠家园3号楼1层</div></div>`)[0];
+                popup_66651aedd78e2ea32a102cd798d1930c.setContent(html_638cc844b7fcea9a51de5ad223fdca0f);
+            
+        
+
+        circle_marker_51321a8cc5e6a77be0d297b9e0325139.bindPopup(popup_66651aedd78e2ea32a102cd798d1930c)
+        ;
+
+        
+    
+    
+            var circle_marker_1d51615ae5d15da378b66ff04232ebe3 = L.circleMarker(
+                [39.890756, 116.443508],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_76056fc30b41b08e39988c71e4843c0c = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_747c0c4f63eb7f9fca74e821d7eedfb5 = $(`<div id="html_747c0c4f63eb7f9fca74e821d7eedfb5" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市东城区光明路11号天玉大厦1层西侧</div></div>`)[0];
+                popup_76056fc30b41b08e39988c71e4843c0c.setContent(html_747c0c4f63eb7f9fca74e821d7eedfb5);
+            
+        
+
+        circle_marker_1d51615ae5d15da378b66ff04232ebe3.bindPopup(popup_76056fc30b41b08e39988c71e4843c0c)
+        ;
+
+        
+    
+    
+            var circle_marker_d26017f163ef70d3971b4f7a87ea7946 = L.circleMarker(
+                [40.240958, 116.176189],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_f8869f774d7074d8376239bb0d632a3d = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_7b8a0caf8dec63f30e66d5a1b5eb8fc2 = $(`<div id="html_7b8a0caf8dec63f30e66d5a1b5eb8fc2" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市昌平区南口镇陈庄村(京藏高速北侧)八达岭奥特莱斯F2</div></div>`)[0];
+                popup_f8869f774d7074d8376239bb0d632a3d.setContent(html_7b8a0caf8dec63f30e66d5a1b5eb8fc2);
+            
+        
+
+        circle_marker_d26017f163ef70d3971b4f7a87ea7946.bindPopup(popup_f8869f774d7074d8376239bb0d632a3d)
+        ;
+
+        
+    
+    
+            var circle_marker_53b52ff3a3c58b1b5d551f494945720c = L.circleMarker(
+                [40.240958, 116.176189],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_e068a596bb7916efd528b1f20d5b5c42 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_82fd6acd288baeaee6147e604e9620c9 = $(`<div id="html_82fd6acd288baeaee6147e604e9620c9" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市昌平区南口镇陈庄村(京藏高速北侧)八达岭奥特莱斯F2(2)</div></div>`)[0];
+                popup_e068a596bb7916efd528b1f20d5b5c42.setContent(html_82fd6acd288baeaee6147e604e9620c9);
+            
+        
+
+        circle_marker_53b52ff3a3c58b1b5d551f494945720c.bindPopup(popup_e068a596bb7916efd528b1f20d5b5c42)
+        ;
+
+        
+    
+    
+            var circle_marker_2a5f2e20e5565eb44ddbaaf48364722e = L.circleMarker(
+                [39.811108, 116.449658],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_e961ef981dc7e3a67353993273d67960 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_0da9e4b1d2a5501abf676abcb114726a = $(`<div id="html_0da9e4b1d2a5501abf676abcb114726a" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市大兴区旧宫镇旧宫西路3号(物美超市左侧)</div></div>`)[0];
+                popup_e961ef981dc7e3a67353993273d67960.setContent(html_0da9e4b1d2a5501abf676abcb114726a);
+            
+        
+
+        circle_marker_2a5f2e20e5565eb44ddbaaf48364722e.bindPopup(popup_e961ef981dc7e3a67353993273d67960)
+        ;
+
+        
+    
+    
+            var circle_marker_5db3f51702f7aad7513c4bb6ef711723 = L.circleMarker(
+                [39.797382, 116.346796],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_98dd8cd728ffc2499d4535e8c70577c4 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_6c7e07c49eb1a56a57263f34c576f529 = $(`<div id="html_6c7e07c49eb1a56a57263f34c576f529" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市大兴区区西红门宏福路鸿坤生活广场</div></div>`)[0];
+                popup_98dd8cd728ffc2499d4535e8c70577c4.setContent(html_6c7e07c49eb1a56a57263f34c576f529);
+            
+        
+
+        circle_marker_5db3f51702f7aad7513c4bb6ef711723.bindPopup(popup_98dd8cd728ffc2499d4535e8c70577c4)
+        ;
+
+        
+    
+    
+            var circle_marker_1db6df80c9598e32b6008df786451181 = L.circleMarker(
+                [39.795298, 116.33387],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_ec9b7dcee378e84e2fb1c11e1b46ab13 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_89f2653f7e4432815284f17a3bdfbc63 = $(`<div id="html_89f2653f7e4432815284f17a3bdfbc63" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市大兴区西红门镇欣宁大街15号1层1-01-28-R号</div></div>`)[0];
+                popup_ec9b7dcee378e84e2fb1c11e1b46ab13.setContent(html_89f2653f7e4432815284f17a3bdfbc63);
+            
+        
+
+        circle_marker_1db6df80c9598e32b6008df786451181.bindPopup(popup_ec9b7dcee378e84e2fb1c11e1b46ab13)
+        ;
+
+        
+    
+    
+            var circle_marker_6d50c248fa8cb6857ca03c987b872937 = L.circleMarker(
+                [39.770126, 116.340761],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_220e0e5e674132e6b2abe2c8905529ee = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_9082c6f0dd9912a856392eaf09467c0a = $(`<div id="html_9082c6f0dd9912a856392eaf09467c0a" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市大兴区金星西路3号</div></div>`)[0];
+                popup_220e0e5e674132e6b2abe2c8905529ee.setContent(html_9082c6f0dd9912a856392eaf09467c0a);
+            
+        
+
+        circle_marker_6d50c248fa8cb6857ca03c987b872937.bindPopup(popup_220e0e5e674132e6b2abe2c8905529ee)
+        ;
+
+        
+    
+    
+            var circle_marker_474a2f4e3a17338ca97adc10d418e9f0 = L.circleMarker(
+                [39.73531, 116.349419],
+                {"bubblingMouseEvents": true, "color": "lime", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lime", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_92dc7dbe5a36c3dc4a31e778b97b117b);
+        
+    
+        var popup_dcaae53dfdbe2b22159c38d4932367ea = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_839f5bf2daea7cd460fce7137f5329a2 = $(`<div id="html_839f5bf2daea7cd460fce7137f5329a2" style="width: 100.0%; height: 100.0%;"><div style="white-space: nowrap;">北京市大兴区黄村东大街38号院2号楼1层（01）内1F-11</div></div>`)[0];
+                popup_dcaae53dfdbe2b22159c38d4932367ea.setContent(html_839f5bf2daea7cd460fce7137f5329a2);
+            
+        
+
+        circle_marker_474a2f4e3a17338ca97adc10d418e9f0.bindPopup(popup_dcaae53dfdbe2b22159c38d4932367ea)
+        ;
+
+        
+    
+</script>
+</html>

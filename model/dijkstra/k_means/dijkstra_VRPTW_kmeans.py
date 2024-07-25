@@ -1,6 +1,7 @@
 # VRPTW
 # Author: Hanzhen Qin
 import json
+import chardet # 用于检测文件编码格式
 from haversine import haversine, Unit # 用来计算两个经纬度之间的距离
 from datetime import datetime, timedelta # 用来计算时间
 import heapdict # dijkstra算法中使用的数据结构, 一种优先队列
@@ -47,18 +48,25 @@ class VRPTW_model(object):
     # 函数用于读取txt文件中json格式的数据
     def load_data(self):
         try:
-            # file = open(self.file_path, 'r', encoding='utf-8') # 打开文件, 读取模式使用仅读取, 编码格式为utf-8
-            # 使用with来打开文件可以确保在文件使用完毕后自动关闭文件
-            with open(self.file_path, 'r', encoding='utf-8') as file:
+            # 检测文件的编码
+            with open(self.file_path, 'rb') as file:
+                raw_data = file.read()
+                result = chardet.detect(raw_data)
+                encoding = result['encoding']
+            # 使用检测到的编码打开文件
+            with open(self.file_path, 'r', encoding=encoding) as file:
                 file_content = file.read()  # 读取txt文件内容
                 self.data = json.loads(file_content)  # 将json字符串解析为python字典
-        # 如果读取txt文件时发生问题, 将会根据情况返回两个报错
+        # 如果读取txt文件时发生问题, 将会根据情况返回3个报错
         except FileNotFoundError:
             # 当你尝试打开一个不存在的文件时, python会抛出FileNotFoundError异常
             print(f"File {self.file_path} not found.")
         except json.JSONDecodeError:
             # 当尝试解码一个无效的json字符串时, python会抛出json.JSONDecodeError异常
             print("Error decoding JSON from the file.\n")
+        except Exception as e:
+            # 捕获所有其他异常
+            print(f"Detect other type of error: {e}")
     
     # 函数用于解析json数据
     def parse_data(self):
