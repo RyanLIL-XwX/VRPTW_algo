@@ -591,7 +591,7 @@ class VRPTW_model(object):
         print("Total number of single vertex: {}\n".format(single_vertex))
 
     # 将路径绘制在地图上
-    def plot_route_on_map(self, location_collect, shortest_path):
+    def plot_route_on_map(self, location_collect, shortest_path, file_name):
         # 创建一个folium地图对象, 初始位置设为仓库的位置
         map_center = [location_collect[0][1], location_collect[0][2]]
         route_map = folium.Map(location=map_center, zoom_start=10, tiles=None)
@@ -665,7 +665,8 @@ class VRPTW_model(object):
                             ).add_to(route_map)
             
         # 保存地图到文件
-        route_map.save("beijing712_dij_VRPTW_hierarchical.html")
+        file_name = file_name.split(".")[0] # 去除文件的扩展名, split()函数在原来的string中更具"."返回一个分割过的list, 然后取第一个元素
+        route_map.save("{}_dij_VRPTW_hierarchical.html".format(file_name))
 
    
 if __name__ == "__main__":
@@ -702,7 +703,7 @@ if __name__ == "__main__":
         # 打印订单数量, 车载重量, 车载空间的利用率和总距离
         order_data.calculate_info(processed_final_path, final_path, file)
         # 将路径绘制到地图上
-        order_data.plot_route_on_map(location_collect, processed_final_path)
+        order_data.plot_route_on_map(location_collect, processed_final_path, file)
 
     start_find_path()
     
