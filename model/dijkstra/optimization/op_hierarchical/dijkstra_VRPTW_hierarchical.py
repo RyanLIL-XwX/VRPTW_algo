@@ -6,8 +6,10 @@ from datetime import datetime, timedelta # 用来计算时间
 import heapdict # dijkstra算法中使用的数据结构, 一种优先队列
 import folium # 用于绘制地图
 import numpy as np
-from sklearn.cluster import KMeans # 用于kmeans聚类
-from sklearn.metrics import davies_bouldin_score # 用于计算davies_bouldin指数, 找到kmeans的最优簇数量
+from scipy.cluster.hierarchy import linkage, fcluster
+# 用于自交叉检查
+from shapely.geometry import LineString # 用于计算两个线段之间的交叉
+from concurrent.futures import ProcessPoolExecutor # 用于多进程处理
 
 class VRPTW_model(object):
     def __init__(self, file_path):
@@ -15,7 +17,7 @@ class VRPTW_model(object):
         self.data = None # dictionary data type
         self.force_merge = None
         self.hand_over_time_by = None
-        self.order_list = []
+        self.order_list = list()
         self.parameters = None
         self.task_code = None
         self.vehicle_type = None
@@ -23,11 +25,11 @@ class VRPTW_model(object):
         
         self.load_data() # 函数用于读取txt文件中json格式的数据
         self.parse_data() # 函数用于解析json数据
-        self.location_collect = [] # 使用list容器来储存经纬度信息
-        self.distance_store = {} # 使用dictionary容器来储存两点之间的距离
-        self.distance_store_update = {} # 使用dictionary容器来储存过滤后的两点之间的距离, 仅包含仓库的距离信息
-        self.weight_collect = {} # 用于收集每个订单的重量信息的函数
-        self.stay_period_info = {} # 用于收集每个订单的停留时间信息的函数
+        self.location_collect = list() # 使用list容器来储存经纬度信息
+        self.distance_store = dict() # 使用dictionary容器来储存两点之间的距离
+        self.distance_store_update = dict() # 使用dictionary容器来储存过滤后的两点之间的距离, 仅包含仓库的距离信息
+        self.weight_collect = dict() # 用于收集每个订单的重量信息的函数
+        self.stay_period_info = dict() # 用于收集每个订单的停留时间信息的函数
         self.first_order_address = None # 第一个订单的地址
         self.set_time = None # 设置时间
         self.set_delta_time = None # 设置时间间隔(分钟)
@@ -42,7 +44,7 @@ class VRPTW_model(object):
         self.set_receive_latest_time = None # 设置最晚收货时间
         
         # 给信息划分并分别处理, 全部都是和self.location_collect一样的结构
-        self.location_collect_split_kmeans = [] # 储存层次聚类分类器的地址信息
+        self.location_collect_split_hierarchical = list() # 储存层次聚类分类器的地址信息
     
     # 函数用于读取txt文件中json格式的数据
     def load_data(self):
@@ -117,7 +119,7 @@ class VRPTW_model(object):
     
     # 收集所有的经纬度信息和对应的地址, 包括order_list和warehouse
     def collect_location_info(self):
-        location_collect = list() # 使用list容器来储存经纬度信息
+        location_collect = [] # 使用list容器来储存经纬度信息
         check_repreated = set() # 使用set容器来储存重复的地址
         count = 2
         # warehouse
@@ -132,7 +134,7 @@ class VRPTW_model(object):
             if ("receivingAddress" in self.order_list[i].keys() and "receivingLatitude" in self.order_list[i].keys() and "receivingLongitude" in self.order_list[i].keys() and self.order_list[i]["receivingLatitude"] != None and self.order_list[i]["receivingLongitude"] != None and self.order_list[i]["receivingAddress"] != None):
                 # 如果有重复的地址, 则在地址后面加上一个数字
                 if (self.order_list[i]["receivingAddress"] in check_repreated):
-                    temp_list = list()
+                    temp_list = []
                     temp_list.append(self.order_list[i]["receivingAddress"] + "(" + str(count) + ")")
                     temp_list.append(float(self.order_list[i]["receivingLatitude"]))
                     temp_list.append(float(self.order_list[i]["receivingLongitude"]))
@@ -140,7 +142,7 @@ class VRPTW_model(object):
                     location_collect.append(temp_list)
                     count += 1
                 else:
-                    temp_list = list()
+                    temp_list = []
                     check_repreated.add(self.order_list[i]["receivingAddress"]) # 将当前地址加入到set容器中, 用于检查是否有重复的地址
                     temp_list.append(self.order_list[i]["receivingAddress"])
                     temp_list.append(float(self.order_list[i]["receivingLatitude"]))
@@ -156,7 +158,7 @@ class VRPTW_model(object):
     def calculate_distance(self, location_collect):
         if (len(location_collect) < 2):
             raise ValueError("The number of locations is less than 2, please provide more locations.")
-        distance_store = dict() # 使用字典来储存两点之间的距离
+        distance_store = {} # 使用字典来储存两点之间的距离
         pointer_a, pointer_b = 0, 1 # 用于指向当前订单的后一个订单
         while True:
             # 完成前指针所需计算的所有距离, 前指针开始更新, 后指针指向前指针的下一个订单
@@ -179,7 +181,7 @@ class VRPTW_model(object):
     
     # 过滤所有关于仓库的距离信息, 过滤self.distance_store
     def warehouse_leave_info(self, distance_store):
-        distance_store_update = dict() # 用来过滤所有关于仓库的距离信息
+        distance_store_update = {} # 用来过滤所有关于仓库的距离信息
         warehouse = self.warehouse["address"]
         for i in distance_store.keys():
             if (i[0] == warehouse):
@@ -335,65 +337,63 @@ class VRPTW_model(object):
             return False
     
     # --------------------------------------------------------- #
+    
+    """
+    对订单进行层次聚类
 
-    def determine_optimal_clusters_db_index(self, location_collect, max_clusters=15):
-        """
-        使用Davies-Bouldin指数确K-means的最优簇数量
+    参数:
+    - location_collect: 所有的订单信息
+    - distance_threshold: 距离阈值，用于确定簇的数量
 
-        参数:
-        - location_collect: 地址的列表, 每个地址包含名称、纬度、经度和描述信息
-        - max_clusters: 最大簇数量
+    返回:
+    - clustered_list: 聚类后的订单列表，每个簇的第一个位置是仓库信息
+    
+    使用了linkage函数, 并选择了ward方法进行聚类. 
+    - Ward方法是一种最小化总方差的聚类方法, 属于凝聚层次聚类的一种.
+    - 凝聚层次聚类: 从每个点自身作为一个簇开始, 不断合并最近的簇, 直到满足停止条件. 
+    """
+    def cluster_location_hierarchical(self, location_collect, distance_threshold=1.0):
+        # 提取经纬度信息
+        coords = np.array([(order[1], order[2]) for order in location_collect], dtype=float)
 
-        返回:
-        - optimal_k: 最优的簇数量
-        """
-        # 提取经纬度信息, 排除仓库
-        coords = np.array([[loc[1], loc[2]] for loc in location_collect if loc[3] != '仓库'], dtype=float)
-        db_scores = []
-        # DB指数在k=1时没有定义
-        for k in range(2, max_clusters + 1):
-            kmeans = KMeans(n_clusters=k, n_init=10, random_state=0).fit(coords)
-            labels = kmeans.labels_
-            db_index = davies_bouldin_score(coords, labels)
-            db_scores.append(db_index)
-        # 找到DB指数最小的簇数量, 也就是对于k-means来说最优的簇数量
-        optimal_k = range(2, max_clusters + 1)[np.argmin(db_scores)]
-        return optimal_k
+        # 使用层次聚类中的Ward方法对坐标进行聚类, 返回一个层次聚类树的链表表示, 这个链表表示了在聚类过程中每一步合并的簇. 
+        Z = linkage(coords, method='ward')
 
-    def cluster_location_kmeans(self, location_collect, n_clusters, n_init=50):
-        """
-        对地址进行K-means聚类
+        # 根据距离阈值将层次聚类树截断, 生成平坦的簇标签
+        labels = fcluster(Z, t=distance_threshold, criterion='distance')
 
-        参数:
-        - location_collect: 地址的列表, 每个地址包含名称、纬度、经度和描述信息
-        - n_clusters: 聚类的簇数量
-        - n_init: K-means算法的初始运行次数
+        # 创建了一个字典, 字典的键是簇标签, 值是空列表, 用于存储每个簇中的数据点
+        clustered_dict = {}
+        for label in np.unique(labels):
+            clustered_dict[label] = []
 
-        返回:
-        - clustered_location_collect: 聚类后的地址列表
-        """
+        # 将每个订单分配到相应的簇中
+        for order, label in zip(location_collect, labels):
+            clustered_dict[label].append(order)
+
+        # 构建结果列表
+        clustered_list = []
         warehouse_info = [self.warehouse["address"], float(self.warehouse["latitude"]), float(self.warehouse["longitude"]), "仓库"]
-        # 提取经纬度信息, 排除仓库
-        coords = np.array([[loc[1], loc[2]] for loc in location_collect if loc[3] != "仓库"], dtype=float)
-
-        # 使用K-means进行聚类
-        kmeans = KMeans(n_clusters=n_clusters, n_init=n_init, random_state=0).fit(coords)
-        labels = kmeans.labels_
-
-        # 将地址按簇分类, 初始每个簇包含仓库信息
-        clustered_location_collect = [[warehouse_info] for _ in range(n_clusters)]
-        non_warehouse_locations = [location for location in location_collect if location[3] != "仓库"]
-
-        for label, location in zip(labels, non_warehouse_locations):
-            clustered_location_collect[label].append(location)
         
-        # 返回聚类后的地址列表
-        self.location_collect_split_kmeans = clustered_location_collect
-        return self.location_collect_split_kmeans
+        for cluster in clustered_dict.values():
+            # 确保仓库信息在每个簇的第一个位置
+            if (warehouse_info not in cluster):
+                cluster.insert(0, warehouse_info)
+            clustered_list.append(cluster)
+
+        self.location_collect_split_hierarchical = clustered_list
+        return self.location_collect_split_hierarchical
     
     # --------------------------------------------------------- #
     
-    # main part: finding path algorithm
+    """
+    main part: dijkstra algorithm
+    - 通过dijkstra算法找到最短路径
+    
+    返回:
+    - dijkstra_path: 每一块数据的最短路径
+    - all_path: 所有的最短路径
+    """
     
     # 找到从仓库出发的第一个订单的地址
     def get_first_order_address(self, distance_store):
@@ -436,8 +436,8 @@ class VRPTW_model(object):
         # 初始化一个优先队列, 用于存储节点, 将起点加入队列
         priority_queue = heapdict.heapdict()
         priority_queue[start_address] = 0
-        dijkstra_path = list() # 用于储存dijkstra算法的最短路径
-        visited_order = list() # 用于储存已经访问过的订单地址
+        dijkstra_path = [] # 用于储存dijkstra算法的最短路径
+        visited_order = [] # 用于储存已经访问过的订单地址
         # 接下来准备对剩下的订单地址进行处理, 不断的添加路径到dijkstra_path中
         while priority_queue:
             # 从优先队列中取出具有最小距离的节点
@@ -458,7 +458,7 @@ class VRPTW_model(object):
         return dijkstra_path
              
     def find_path(self, distance_store):
-        dijkstra_path = list() # 用于储存dijkstra算法的最短路径
+        dijkstra_path = [] # 用于储存dijkstra算法的最短路径
         # edge case: 如果只有一个订单, 则直接返回该订单的地址
         if (len(distance_store) == 1):
             for i in distance_store.keys():
@@ -477,19 +477,19 @@ class VRPTW_model(object):
                
     # 运行find_path()函数, 每次调用一个cluster的数据去进行最短路径的查找
     def run_find_path(self):
-        all_path = list() # 用于储存所有的最短路径
-        for i in range(len(self.location_collect_split_kmeans)):
-            if (len(self.location_collect_split_kmeans[i]) >= 2):
-                all_path.append(self.find_path(self.calculate_distance(self.location_collect_split_kmeans[i])))
-            elif (len(self.location_collect_split_kmeans[i]) == 1):
-                all_path.append(self.location_collect_split_kmeans[i][0][0])
+        all_path = [] # 用于储存所有的最短路径
+        for i in range(len(self.location_collect_split_hierarchical)):
+            if (len(self.location_collect_split_hierarchical[i]) >= 2):
+                all_path.append(self.find_path(self.calculate_distance(self.location_collect_split_hierarchical[i])))
+            elif (len(self.location_collect_split_hierarchical[i]) == 1):
+                all_path.append(self.location_collect_split_hierarchical[i][0][0])
             else:
                 continue
         return all_path
     
     # 处理dijkstra算法的路径, 用于检查车载重量, 车载空间和时间是否可行
     def process_dijkstra_path(self, all_path):
-        final_path = list() # 用于储存最终的路径
+        final_path = [] # 用于储存最终的路径
         car_speed = self.parameters["speed"]
         visited_address = set() # 用于储存已经访问过的地址
         for order_path in all_path:
@@ -499,7 +499,7 @@ class VRPTW_model(object):
             leave_time = "" # 离开当前订单的时间(分钟)
             current_pointer = 0 # 访问当前订单的指针
             pointer = 0 # 如果当前订单不可行, 用来检查下一个可行订单
-            temp_list = list() # 用于储存可以符合要求的订单地址
+            temp_list = [] # 用于储存可以符合要求的订单地址
             while current_pointer < len(order_path):
                 if (order_path[current_pointer] in visited_address):
                     current_pointer += 1
@@ -540,27 +540,125 @@ class VRPTW_model(object):
                     temp_list.clear()     
             # 如果一整条路线都可以用一辆车装完, 则直接加入到final_path中
             final_path.append(temp_list)
-        processed_final_path = list() # 用于储存处理后的最终路径
+        processed_final_path = [] # 用于储存处理后的最终路径
         # 将final_path中的address元素提取出来, 并且将其转换为一个list
         for sublist in final_path:
             addresses = [address for address, _ in sublist]
             processed_final_path.append(addresses)
         return processed_final_path, final_path
+    
+    # --------------------------------------------------------- #
+    
+    """
+    优化路径, 解决自交叉问题
+    """
+    
+    # 通过地址获取经纬度
+    def geocode_address(self, address):
+        for i in self.location_collect:
+            if (i[0] == address):
+                return (i[1], i[2])
+    
+    # 计算一个路径中的总距离
+    def calculate_total_distance(self, routes):
+        if (len(routes) < 2):
+            return 0.0
+        total_distance = 0.0
+        for i in range(len(routes) - 1):
+            total_distance += haversine((routes[i][0], routes[i][1]), (routes[i + 1][0], routes[i + 1][1]), unit=Unit.KILOMETERS)
+        return total_distance
+
+    # 判断路径是否有自交叉
+    def has_self_intersection(self, path):
+        # corner case: 如果路径的长度小于2, 则直接返回False, 因为路径的长度小于2时, 是不可能有自交叉的
+        if (len(path) < 2):
+            return False
+        # 使用shapely库来创建线对象并检查其路线是否简单
+        line = LineString(path)
+        return not line.is_simple
+
+    """
+    two-opt算法, 用于解决路径的自交叉问题
+    
+    - 用于优化旅行商问题(TSP)路径的改进方法. 它通过反转路径中任意两个边之间的所有节点来减少路径的总距离.
+    - 这种反转操作会一直进行, 直到找不到更短的路径为止
+    """
+    def two_opt(self, route):
+        best = route # 初始化最佳路径为当前路径
+        best_distance = self.calculate_total_distance(route)
+        improved = True
+        # 2-opt算法通过交换两个边来减少路径长度, 直到不能进一步改进为止
+        while improved:
+            improved = False
+            # 遍历路径中的每个节点(不包括第一个和最后两个节点), 因为交换第一个或最后一个节点的边没有意义
+            for i in range(1, len(route) - 2):
+                # 确保每一次路径中都至少有一个节点，这样才有可能出现交叉
+                for j in range(i + 2, len(route)):
+                    # 生成一个新的路径, 新的路径是通过将route[i:j]之间的部分反转来创建的
+                    # route[:i]是index i之前的路径, route[i:j][::-1]是将index i到index j之间的路径反转, route[j:]是index j之后的路径
+                    new_route = route[:i] + route[i:j][::-1] + route[j:]
+                    new_distance = self.calculate_total_distance(new_route)
+                    if (new_distance < best_distance):
+                        best = new_route
+                        best_distance = new_distance
+                        improved = True
+            # 更新原来的路径为当前的最佳路径
+            route = best
+        return best
+    
+    # 优化路径, 这个函数将地址路径转换为坐标路径检查是否有自交叉, 如果有, 则使用2-opt算法优化路径。
+    def optimize_path(self, path):
+        # 将地址转换为坐标
+        coordinates = [self.geocode_address(address) for address in path]
+        # 检查路径是否有自交叉, 如果有, 则使用2-opt算法优化路径并返回优化后的路径, 否则返回原始路径
+        if (self.has_self_intersection(coordinates) == True):
+            optimized_coords = self.two_opt(coordinates)
+            # 将优化后的坐标重新转换为地址
+            optimized_path = []
+            for coord in optimized_coords:
+                index = coordinates.index(coord)  # 找到坐标在原始坐标列表中的位置
+                optimized_path.append(path[index])  # 根据位置找到对应的原始地址并添加到优化后的路径中
+            return optimized_path
+        return path
+
+    # 运行optimize_path函数, 并行优化路径的自交叉问题
+    def run_optimize_path(self, processed_final_path):
+        # 创建一个进程池, 并行优化路径
+        # ProcessPoolExecutor会自动管理一个进程池, 执行并发任务. 使用with语句确保在代码块结束时自动关闭进程池
+        """
+        创建一个进程池, 并行优化路径
+        
+        - ProcessPoolExecutor会自动管理一个进程池, 执行并发任务. 使用with语句确保在代码块结束时自动关闭进程池        
+        - 多进程是指运行多个独立的进程, 每个进程有自己的内存空间.
+        - 进程之间不共享内存, 数据的共享通常需要通过进程间通信(IPC)机制
+        """
+        with ProcessPoolExecutor() as executor:
+            """
+            这里只可以使用list()函数来将executor.map(), 否则会报错
+            因为map()返回的是一个map object, 而不是一个list
+            list(executor.map(optimize_path, paths)):
+            - 将生成器中的所有元素取出, 并放入一个新列表中, 最终optimized_path是一个包含所有优化路径的列表.
+            
+            [executor.map(optimize_path, paths)]:
+            - 创建一个包含生成器的列表, 最终optimized_path是一个包含生成器的列表, 而不是包含路径的列表.
+            """
+            optimized_path = list(executor.map(self.optimize_path, processed_final_path))
+        return optimized_path
 
     # --------------------------------------------------------- #
 
     # 计算车载重量和车载空间的利用率, 以及总距离
-    def calculate_info(self, processed_final_path, final_path, file_name):
-        weight_utilization = list() # 用于储存车载重量的利用率
+    def calculate_info(self, optimized_final_path, final_path, file_name):
+        weight_utilization = [] # 用于储存车载重量的利用率
         weight_record = 0.0 # 用于检查车载重量是否可行
-        volume_utilization = list() # 用于储存车载空间的利用率
+        volume_utilization = [] # 用于储存车载空间的利用率
         volume_record = 0.0 # 用于检查车载空间是否可行
         max_weight = self.vehicle_type["loadableWeight"] # 车辆的最大载重量
         max_volume = self.vehicle_type["loadableVolume"] # 车辆的最大载重量
         order = 0 # 用于记录订单的数量
         single_vertex = 0 # 用于记录孤点的数量
         # 计算车载重量和车载空间的利用率
-        for i in processed_final_path:
+        for i in optimized_final_path:
             if (len(i) == 1):
                 single_vertex += 1
             for j in i:
@@ -596,7 +694,7 @@ class VRPTW_model(object):
                         total_distance += self.distance_store_update[(warehouse_info, i[j][0])]
                 else:
                     total_distance += i[j][1]
-        print("Total distance for the {}: {:.2f}km and Total number of cars using: [{}]".format(file_name, total_distance, len(processed_final_path)))
+        print("Total distance for the {}: {:.2f}km and Total number of cars using: [{}]".format(file_name, total_distance, len(optimized_final_path)))
         print("Total number of single vertex: {}\n".format(single_vertex))
 
     # 将路径绘制在地图上
@@ -698,23 +796,22 @@ if __name__ == "__main__":
         # print(location_collect)
         distance_store = order_data.calculate_distance(location_collect)
         # print(distance_store)
-        optimal_k = order_data.determine_optimal_clusters_db_index(location_collect)
-        location_collect_split_kmeans = order_data.cluster_location_kmeans(location_collect, optimal_k)
-        # print(location_collect_split_kmeans)
+        location_collect_split_hierarchical = order_data.cluster_location_hierarchical(location_collect)
+        # print(location_collect_split_hierarchical)
         
         # 运行dijkstra算法, 并且找到最短路径, 再将路径绘制到地图上
-        dijkstra_path_kmeans = order_data.run_find_path()
-        # print(dijkstra_path_kmeans)
-        processed_final_path, final_path = order_data.process_dijkstra_path(dijkstra_path_kmeans)
+        dijkstra_path_hierarchical = order_data.run_find_path()
+        # print(dijkstra_path_hierarchical)
+        processed_final_path, final_path = order_data.process_dijkstra_path(dijkstra_path_hierarchical)
         # print(processed_final_path)
+        optimized_final_path = order_data.run_optimize_path(processed_final_path)
+        # print(optimized_final_path)
         # 打印订单数量, 车载重量, 车载空间的利用率和总距离
-        order_data.calculate_info(processed_final_path, final_path, file)
+        order_data.calculate_info(optimized_final_path, final_path, file)
         # 将路径绘制到地图上
-        order_data.plot_route_on_map(location_collect, processed_final_path)
+        order_data.plot_route_on_map(location_collect, optimized_final_path)
 
     start_find_path()
-    
-    
     
     
     
