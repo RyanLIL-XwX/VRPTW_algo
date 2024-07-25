@@ -335,22 +335,21 @@ class VRPTW_model(object):
     
     # --------------------------------------------------------- #
 
-    # 使用层次聚类对订单进行聚类
+    """
+    对订单进行层次聚类
+
+    参数:
+    - location_collect: 所有的订单信息
+    - distance_threshold: 距离阈值，用于确定簇的数量
+
+    返回:
+    - clustered_list: 聚类后的订单列表，每个簇的第一个位置是仓库信息
+    
+    使用了linkage函数, 并选择了ward方法进行聚类. 
+    - Ward方法是一种最小化总方差的聚类方法, 属于凝聚层次聚类的一种.
+    - 凝聚层次聚类: 从每个点自身作为一个簇开始, 不断合并最近的簇, 直到满足停止条件. 
+    """
     def cluster_location_hierarchical(self, location_collect, distance_threshold=1.0):
-        """
-        对订单进行层次聚类
-
-        参数:
-        - location_collect: 所有的订单信息
-        - distance_threshold: 距离阈值，用于确定簇的数量
-
-        返回:
-        - clustered_list: 聚类后的订单列表，每个簇的第一个位置是仓库信息
-        
-        使用了linkage函数, 并选择了ward方法进行聚类. 
-        - Ward方法是一种最小化总方差的聚类方法, 属于凝聚层次聚类的一种.
-        - 凝聚层次聚类: 从每个点自身作为一个簇开始, 不断合并最近的簇, 直到满足停止条件. 
-        """
         # 提取经纬度信息
         coords = np.array([(order[1], order[2]) for order in location_collect], dtype=float)
 
@@ -384,7 +383,14 @@ class VRPTW_model(object):
     
     # --------------------------------------------------------- #
     
-    # main part: finding path algorithm
+    """
+    main part: dijkstra algorithm
+    - 通过dijkstra算法找到最短路径
+    
+    返回:
+    - dijkstra_path: 每一块数据的最短路径
+    - all_path: 所有的最短路径
+    """
     
     # 找到从仓库出发的第一个订单的地址
     def get_first_order_address(self, distance_store):

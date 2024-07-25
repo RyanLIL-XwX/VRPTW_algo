@@ -336,6 +336,10 @@ class VRPTW_model(object):
     
     # --------------------------------------------------------- #
 
+    """
+    使用K-means聚类算法对地址进行聚类, 并使用Davies-Bouldin指数确定最优簇数量
+    """
+    
     def determine_optimal_clusters_db_index(self, location_collect, max_clusters=15):
         """
         使用Davies-Bouldin指数确K-means的最优簇数量
@@ -393,7 +397,14 @@ class VRPTW_model(object):
     
     # --------------------------------------------------------- #
     
-    # main part: finding path algorithm
+    """
+    main part: dijkstra algorithm
+    - 通过dijkstra算法找到最短路径
+    
+    返回:
+    - dijkstra_path: 每一块数据的最短路径
+    - all_path: 所有的最短路径
+    """
     
     # 找到从仓库出发的第一个订单的地址
     def get_first_order_address(self, distance_store):
