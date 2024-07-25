@@ -771,7 +771,7 @@ class VRPTW_model(object):
                                 popup=folium.Popup(f'<div style="white-space: nowrap;">{address}</div>', max_width=300)
                             ).add_to(route_map)
         # 保存地图到文件
-        route_map.save("route_map.html")
+        route_map.save("beijing712_dij_VRPTW_hierarchical.html")
           
 if __name__ == "__main__":
     # 创建一个VRPTW_model对象, 并将file作为参数传入
