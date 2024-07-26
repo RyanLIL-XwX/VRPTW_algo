@@ -1,0 +1,43 @@
+VRPTW model(dijkstra, greedy, hierarchical, kmeans)
+
+1. Dijkstra and Greedy Algorithms for Shortest Path
+We can conclude that Dijkstra's algorithm generally outperforms the Greedy algorithm in terms
+of data and results, achieving higher load rates and fewer trips. However, Dijkstra's paths
+often appear as many radiating lines, which, in graph theory, makes the Greedy algorithm's
+visual representation superior to that of Dijkstra's algorithm.
+
+2. Hierarchical Clustering and K-means Clustering
+It is clear that K-means performs relatively poorly on smaller datasets, as it tends to create
+many clusters, leading to more vehicle usage and lower load rates. However, K-means shows very
+good performance on medium and large datasets, with minimal overlap between clusters.
+
+For hierarchical clustering, it performs excellently on small datasets, achieving very
+high load rates and fewer trips. It also performs well on medium and large datasets, with better
+load rates and fewer trips. However, the drawback is the higher mileage and potential overlap between clusters.
+
+Summary:
+- Small Datasets:
+  - Data Layer: Dijkstra > Greedy, Hierarchical > K-means
+  - Image Layer: Dijkstra = Greedy, Hierarchical > K-means
+  - Mileage: K-means > Hierarchical
+
+- Medium Datasets:
+  - Data Layer: Dijkstra > Greedy, Hierarchical > K-means
+  - Image Layer: Greedy > Dijkstra, K-means > Hierarchical
+  - Mileage: K-means > Hierarchical
+
+- Large Datasets:
+  - Data Layer: Dijkstra > Greedy, Hierarchical >= K-means
+  - Image Layer: Greedy > Dijkstra, K-means > Hierarchical
+  - Mileage: K-means > Hierarchical
+
+Based on the above analysis:
+- Hierarchical clustering is suitable for small datasets.
+
+- K-means clustering is suitable for medium and large datasets. Although
+K-means might not perform as well as hierarchical clustering on medium datasets, the significantly
+lower mileage makes it more reasonable.
+
+Optimization Ideas:
+- Poor image representation: Change the shortest path algorithm.
+- Poor clustering of orders: Optimize or change the clustering algorithm.
