@@ -1,0 +1,37 @@
+通过我目前对项目的进展，数据以及图像我总结了一些点:
+1. dijkstra和greedy两种最短路径的算法
+我们可以得知dijkstra算法的普遍数据和结果都优于greedy算法，
+有着更高的满载率和更少的车次。但是同时问题是dijkstra的路径会出现很多射线型，这一点在图论上面看，
+greedy算法会比dijkstra算法呈现的图像要好得多。
+
+2. 层次聚类(hierarchical)和kmeans两种聚类
+很明显的是kmeans在处理数据较少的数据集中，效果会相对较差，因为他会有很多的cluster，
+导致用车会更多并且满载率更低。但是kmeans在处理中型数据集和大型数据集时都有着非常不错的效果，
+并且对于kmeans来说很少会出现cluster和cluster直接的重叠。
+
+对于层次聚类来说，在处理小数据集时效果非常的好，有着非常优秀的满载率和车次。在中等型和大型数据集的表现也非常的不错，
+有着更加优秀的满载率和车次。但是缺点是有着较高的里程数，会出现cluster和cluster直接的重叠。
+
+总结:
+- 小型数据集:
+数据层: dijkstra > greedy, hierarchical > kmeans
+图像层: dijkstra = greedy, hierarchical > kmeans
+里程数: kmeans > hierarchical
+
+- 中型数据集:
+数据层: dijkstra > greedy, hierarchical > kmeans
+图像层: greedy > dijkstra, kmeans > hierarchical
+里程数: kmeans > hierarchical
+
+- 大型数据集:
+数据层: dijkstra > greedy, hierarchical >= kmeans
+图像层: greedy > dijkstra, kmeans > hierarchical
+里程数: kmeans > hierarchical
+
+通过上面的分析:
+hierarchical聚类适合用于小型数据集
+kmeans聚类适合用于中型和大型数据集，虽然在中型数据集时数据没有hierarchical聚类好，但是因为里程数会少非常多所以更加合理。
+
+优化思路:
+图像呈现不好: 更改最短路径算法
+订单的聚类不好: 优化或者更改聚类算法
